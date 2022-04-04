@@ -11,26 +11,25 @@
 int Sleep(long msec);
 #endif
 
+#define MAX_COLUMNS 80
+#define MAX_LINES   24
+
+#define COLLECTOR_WIDTH 10
+
+enum {
+    MENU_STATE,
+    GAME_STATE,
+    RULES_STATE,
+    GAMEOVER_STATE,
+    NO_STATE,
+} state = MENU_STATE, prev_state = NO_STATE;
+
 int main()
 {
-    int MAX_COLUMNS = 80;
-    int MAX_LINES = 24;
-
-    /* Game states */
-    int MENU_STATE = 0;
-    int GAME_STATE = 1;
-    int RULES_STATE = 2;
-    int GAMEOVER_STATE = 3;
-
-    int state = MENU_STATE;
-    int prev_state = -1;
-
     /** Menu state variables */
     int menu_curr_option = 0;
 
     /* Collector */
-    int COLLECTOR_WIDTH = 11;
-
     int collector_x = MAX_COLUMNS / 2 - COLLECTOR_WIDTH / 2;
     int collector_y = MAX_LINES * 0.8;
 
@@ -39,8 +38,6 @@ int main()
     /* Ball */
     int ball_x = 1 + rand() % MAX_COLUMNS;
     int ball_y = 4;
-    float ball_move_y = 0;
-    float ball_y_velocity = 0.0005;
 
     /* General variables */
     int quit_game = 0;
@@ -181,7 +178,7 @@ int main()
                 }
             }
 
-            if (key == 'w') 
+            if (key == 'w')
                 menu_curr_option -= menu_curr_option > 0;
             else if (key == 's')
                 menu_curr_option += menu_curr_option < 2;
@@ -234,11 +231,14 @@ int main()
                 cprintf("3. Sair");
 
                 textcolor(WHITE);
+                gotoxy(1, MAX_LINES - 2);
+                cprintf("w: seta para cima");
+
                 gotoxy(1, MAX_LINES - 1);
-                cprintf("w: opção superior");
+                cprintf("s: seta para baixo");
 
                 gotoxy(1, MAX_LINES - 0);
-                cprintf("s: opção inferior");
+                cprintf("↲: confirmar seleção");
 
                 redraw = 0;
             }
@@ -259,13 +259,9 @@ int main()
             }
 
             if ((clock() - time_start) / CLOCKS_PER_SEC > 1) {
-                if ((ball_move_y += ball_y_velocity) > 1) {
-                    ball_move_y = 0;
-                    ++ball_y;
-                    redraw = 1;
-
-                    time_start = clock();
-                }
+                ++ball_y;
+                redraw = 1;
+                time_start = clock();
             }
 
             if (ball_y == collector_y) {
@@ -277,7 +273,6 @@ int main()
 
                     ball_x = 1 + rand() % MAX_COLUMNS;
                     ball_y = 4;
-                    ball_move_y = 0;
                     ++collector_points;
                 } else {
                     state = GAMEOVER_STATE;
@@ -289,6 +284,7 @@ int main()
 
             if (redraw) {
                 textcolor(BLACK);
+                textbackground(BLUE);
                 gotoxy(1, 1);
                 cprintf("Pontos: %d", collector_points);
 
@@ -341,7 +337,7 @@ int main()
                 gotoxy(i, j++);
                 cprintf("1. Ao iniciar o jogo as teclas responsáveis por mover");
                 gotoxy(i, j++);
-                cprintf("   a barra (collector) serão a e b.");
+                cprintf("   a barra (collector) serão a e d.");
 
                 ++j;
                 gotoxy(i, j++);
@@ -372,7 +368,6 @@ int main()
 
                 ball_x = 1 + rand() % MAX_COLUMNS;
                 ball_y = 4;
-                ball_move_y = 0;
             }
 
             if (redraw) {
