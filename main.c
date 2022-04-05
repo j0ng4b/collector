@@ -78,6 +78,53 @@ void reinicia_jogo(void)
     bola_pos_y = 2;
 }
 
+void animacao_gameover(void)
+{
+    int bolas[COLUNAS + 1] = {0};
+
+    while (bolas[COLUNAS] <= LINHAS) {
+        /* Declarações no for não é ANSI C, ou seja, é algo inválido */
+        for (int i = 1; i <= COLUNAS; ++i) {
+            if (bolas[i] > 0) {
+                if (bolas[i] <= LINHAS) {
+                    textbackground(WHITE);
+
+                    gotoxy(i, bolas[i]);
+                    cprintf(" ");
+
+                    gotoxy(COLUNAS + 1 - i, bolas[i]);
+                    cprintf(" ");
+                }
+
+                if (bolas[i] > 1) {
+                    textbackground(BLACK);
+
+                    gotoxy(i, bolas[i] - 1);
+                    cprintf(" ");
+
+                    gotoxy(COLUNAS + 1 - i, bolas[i] - 1);
+                    cprintf(" ");
+                }
+            }
+
+            if (i > 1)
+                bolas[i] += bolas[i] <= LINHAS && bolas[i - 1] > 2;
+            else
+                bolas[i] += bolas[i] <= LINHAS;
+        }
+
+        gotoxy(COLUNAS / 2, LINHAS);
+    }
+
+    textbackground(BLACK);
+
+    gotoxy(1, bolas[COLUNAS] - 1);
+    cprintf(" ");
+
+    gotoxy(COLUNAS, bolas[COLUNAS] - 1);
+    cprintf(" ");
+}
+
 int main()
 {
     int clear_color1, clear_color2;
@@ -148,45 +195,49 @@ int main()
             tela_anterior = tela;
             redesenhar = 1;
 
-            for (i = 1; i <= LINHAS / 2; ++i) {
-                for (j = 1; j <= COLUNAS; ++j) {
-                    textbackground(WHITE);
-                    gotoxy(j, i);
-                    cprintf(" ");
-
-                    gotoxy(j, LINHAS - (i - 1));
-                    cprintf(" ");
-
-                    if (i > 1) {
-                        textbackground(clear_color1);
-                        textcolor(clear_color1);
-                        gotoxy(j, i - 1);
+            if (tela == TELA_GAMEOVER) {
+                animacao_gameover();
+            } else {
+                for (i = 1; i <= LINHAS / 2; ++i) {
+                    for (j = 1; j <= COLUNAS; ++j) {
+                        textbackground(WHITE);
+                        gotoxy(j, i);
                         cprintf(" ");
 
-                        if (i <= LINHAS * 0.2)
-                            textbackground(clear_color2);
+                        gotoxy(j, LINHAS - (i - 1));
+                        cprintf(" ");
 
-                        gotoxy(j, LINHAS - (i - 2));
+                        if (i > 1) {
+                            textbackground(clear_color1);
+                            textcolor(clear_color1);
+                            gotoxy(j, i - 1);
+                            cprintf(" ");
+
+                            if (i <= LINHAS * 0.2)
+                                textbackground(clear_color2);
+
+                            gotoxy(j, LINHAS - (i - 2));
+                            cprintf(" ");
+                        }
+                    }
+
+                    gotoxy(COLUNAS / 2, LINHAS / 2);
+                    Sleep(20);
+                }
+
+                textbackground(clear_color1);
+                for (j = COLUNAS / 2; j > 0; --j) {
+                    for (i = 0; i < 2; ++i) {
+                        gotoxy(j, LINHAS / 2 + i);
+                        cprintf(" ");
+
+                        gotoxy(COLUNAS - (j - 1), LINHAS / 2 + i);
                         cprintf(" ");
                     }
+
+                    gotoxy(COLUNAS / 2, LINHAS);
+                    Sleep(15);
                 }
-
-                gotoxy(COLUNAS / 2, LINHAS / 2);
-                Sleep(20);
-            }
-
-            textbackground(clear_color1);
-            for (j = COLUNAS / 2; j > 0; --j) {
-                for (i = 0; i < 2; ++i) {
-                    gotoxy(j, LINHAS / 2 + i);
-                    cprintf(" ");
-
-                    gotoxy(COLUNAS - (j - 1), LINHAS / 2 + i);
-                    cprintf(" ");
-                }
-
-                gotoxy(COLUNAS / 2, LINHAS);
-                Sleep(15);
             }
 
             while (kbhit()) getch();
@@ -296,7 +347,7 @@ int main()
                 redesenhar -= redesenhar > 0;
             }
 
-            if ((clock() - temporizador) / CLOCKS_PER_SEC > 1) {
+            if ((clock() - temporizador) / (double) CLOCKS_PER_SEC > 0.3) {
                 ++bola_pos_y;
                 redesenhar = 1;
                 temporizador = clock();
@@ -304,7 +355,7 @@ int main()
 
             if (bola_pos_y == coletor_pos_y) {
                 if (bola_pos_x >= coletor_pos_x
-                        && bola_pos_x <= coletor_pos_x + LARGURA_COLETOR) {
+                        && bola_pos_x < coletor_pos_x + LARGURA_COLETOR) {
                     textbackground(BLUE);
                     gotoxy(bola_pos_x, bola_pos_y - 1);
                     cprintf(" ");
