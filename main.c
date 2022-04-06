@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <locale.h>
 #include <stdlib.h>
 #include <time.h>
@@ -33,15 +34,20 @@ int Sleep(long msec)
 
 
 /*********** Definições */
-#define COLUNAS         80
-#define LINHAS          24
+#define COLUNAS                      80
+#define LINHAS                       24
 
-#define LARGURA_COLETOR 10
+#define LARGURA_COLETOR              10
 
-#define TELA_MENU       0
-#define TELA_JOGO       1
-#define TELA_REGRAS     2
-#define TELA_GAMEOVER   3
+#define TELA_MENU                    0
+#define TELA_JOGO                    1
+#define TELA_REGRAS                  2
+#define TELA_GAMEOVER                3
+#define TELA_PONTUACAO               4
+
+#define NUMERO_PONTUACOES            6
+#define TAMANHO_NOME_PONTUACAO       4
+#define PONTUACAO_MAXIMO_TEXTO_LINHA 40
 
 
 /*********** Variáveis globais */
@@ -56,6 +62,12 @@ int coletor_pontos;
 
 int bola_pos_x;
 int bola_pos_y;
+
+char pontuacao_nomes[NUMERO_PONTUACOES][TAMANHO_NOME_PONTUACAO] = {
+    "JON", "JON", "JON", "JON", "JON", "JON",
+};
+
+int pontuacao_maximas[NUMERO_PONTUACOES] = {0};
 
 int sair_do_jogo = 0;
 int redesenhar = 1;
@@ -262,6 +274,13 @@ int main()
                     tela = TELA_REGRAS;
                     break;
 
+                case 2:
+                    clear_color1 = BLACK;
+                    clear_color2 = BLACK;
+
+                    tela = TELA_PONTUACAO;
+                    break;
+
                 default:
                     sair_do_jogo = 1;
                 }
@@ -270,7 +289,7 @@ int main()
             if (key == 'w')
                 menu_opcao_atual -= menu_opcao_atual > 0;
             else if (key == 's')
-                menu_opcao_atual += menu_opcao_atual < 2;
+                menu_opcao_atual += menu_opcao_atual < 3;
             else
                 redesenhar -= redesenhar > 0;
 
@@ -300,16 +319,16 @@ int main()
                 else
                     textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 5, ++j);
-                cprintf("1. Iniciar");
+                gotoxy(COLUNAS / 2 - 3, ++j);
+                cprintf("Iniciar");
 
                 if (menu_opcao_atual == 1)
                     textcolor(RED);
                 else
                     textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 5, ++j);
-                cprintf("2. Regras");
+                gotoxy(COLUNAS / 2 - 3, ++j);
+                cprintf("Regras");
 
                 if (menu_opcao_atual == 2)
                     textcolor(RED);
@@ -317,7 +336,15 @@ int main()
                     textcolor(WHITE);
 
                 gotoxy(COLUNAS / 2 - 5, ++j);
-                cprintf("3. Sair");
+                cprintf("Pontuações");
+
+                if (menu_opcao_atual == 3)
+                    textcolor(RED);
+                else
+                    textcolor(WHITE);
+
+                gotoxy(COLUNAS / 2 - 2, ++j);
+                cprintf("Sair");
 
                 textcolor(WHITE);
                 gotoxy(1, LINHAS - 2);
@@ -483,6 +510,46 @@ int main()
 
                 gotoxy(COLUNAS / 2 - 15, ++j + 1);
                 cprintf("Precione b para voltar ao menu");
+
+                redesenhar = 0;
+            }
+        } else if (tela == TELA_PONTUACAO) {
+            if (key == 'b') {
+                tela = TELA_MENU;
+
+                clear_color1 = BLACK;
+                clear_color2 = BLACK;
+            }
+
+            if (redesenhar) {
+                i = COLUNAS / 2 - PONTUACAO_MAXIMO_TEXTO_LINHA / 2;
+                j = LINHAS / 2 - (NUMERO_PONTUACOES * 2 + 3) / 2;
+
+                textcolor(RED);
+
+                gotoxy(COLUNAS / 2 - 5, j);
+                j += 2;
+                cprintf("PONTUAÇÕES");
+
+                textcolor(WHITE);
+
+                /* Declarações no for não é ANSI C, ou seja, é algo inválido */
+                for (int k = 0; k < NUMERO_PONTUACOES; ++k, ++j) {
+                    gotoxy(i, j);
+
+                    for (int l = 0; l < PONTUACAO_MAXIMO_TEXTO_LINHA; ++l)
+                        cprintf(".");
+
+                    gotoxy(i, j);
+                    for (l = 0; l < TAMANHO_NOME_PONTUACAO - 1; ++l)
+                        cprintf("%c ", toupper(pontuacao_nomes[k][l]));
+
+                    gotoxy(i + PONTUACAO_MAXIMO_TEXTO_LINHA - 9, j++);
+                    cprintf(" %4d pts", pontuacao_maximas[k]);
+                }
+
+                gotoxy(COLUNAS / 2 - 2, j + 1);
+                cprintf("<< b");
 
                 redesenhar = 0;
             }
