@@ -484,7 +484,7 @@ int main()
 
             if (redesenhar) {
                 i = COLUNAS / 2 - 32;
-                j = LINHAS / 2 - 3;
+                j = LINHAS / 2 - 9;
 
                 textcolor(RED);
 
@@ -505,10 +505,31 @@ int main()
 
                 textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 5, ++j);
-                cprintf("Pontos: %02d", coletor_pontos);
+                gotoxy(COLUNAS / 2 - 8, ++j);
+                cprintf("Seus pontos: %4d", coletor_pontos);
 
-                gotoxy(COLUNAS / 2 - 15, ++j + 1);
+                i = COLUNAS / 2 - PONTUACAO_MAXIMO_TEXTO_LINHA / 2;
+                j += 3;
+
+                gotoxy(COLUNAS / 2 - 4, j++);
+                cprintf("Recordes");
+
+                /* Declarações no for não é ANSI C, ou seja, é algo inválido */
+                for (int k = 0; k < 3; ++k, ++j) {
+                    gotoxy(i, j);
+
+                    for (int l = 0; l < PONTUACAO_MAXIMO_TEXTO_LINHA; ++l)
+                        cprintf(".");
+
+                    gotoxy(i, j);
+                    for (l = 0; l < TAMANHO_NOME_PONTUACAO - 1; ++l)
+                        cprintf("%c ", toupper(pontuacao_nomes[k][l]));
+
+                    gotoxy(i + PONTUACAO_MAXIMO_TEXTO_LINHA - 9, j++);
+                    cprintf(" %4d pts", pontuacao_maximas[k]);
+                }
+
+                gotoxy(COLUNAS / 2 - 15, ++j);
                 cprintf("Precione b para voltar ao menu");
 
                 redesenhar = 0;
