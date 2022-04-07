@@ -34,20 +34,20 @@ int Sleep(long msec)
 
 
 /*********** Definições */
-#define COLUNAS                      80
-#define LINHAS                       24
+#define COLUNAS                    80
+#define LINHAS                     24
 
-#define LARGURA_COLETOR              10
+#define LARGURA_COLETOR            10
 
-#define TELA_MENU                    0
-#define TELA_JOGO                    1
-#define TELA_REGRAS                  2
-#define TELA_GAMEOVER                3
-#define TELA_PONTUACAO               4
+#define TELA_MENU                  0
+#define TELA_JOGO                  1
+#define TELA_REGRAS                2
+#define TELA_GAMEOVER              3
+#define TELA_RECORDE               4
 
-#define NUMERO_PONTUACOES            6
-#define TAMANHO_NOME_PONTUACAO       4
-#define PONTUACAO_MAXIMO_TEXTO_LINHA 40
+#define NUMERO_RECORDES            6
+#define TAMANHO_NOME_RECORDE       4
+#define RECORDE_MAXIMO_TEXTO_LINHA 40
 
 
 /*********** Variáveis globais */
@@ -63,11 +63,11 @@ int coletor_pontos;
 int bola_pos_x;
 int bola_pos_y;
 
-char pontuacao_nomes[NUMERO_PONTUACOES][TAMANHO_NOME_PONTUACAO] = {
+char recorde_nomes[NUMERO_RECORDES][TAMANHO_NOME_RECORDE] = {
     "JON", "JON", "JON", "JON", "JON", "JON",
 };
 
-int pontuacao_maximas[NUMERO_PONTUACOES] = {0};
+int recorde_maximas[NUMERO_RECORDES] = {0};
 
 int sair_do_jogo = 0;
 int redesenhar = 1;
@@ -278,7 +278,7 @@ int main()
                     clear_color1 = BLACK;
                     clear_color2 = BLACK;
 
-                    tela = TELA_PONTUACAO;
+                    tela = TELA_RECORDE;
                     break;
 
                 default:
@@ -335,8 +335,8 @@ int main()
                 else
                     textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 5, ++j);
-                cprintf("Pontuações");
+                gotoxy(COLUNAS / 2 - 4, ++j);
+                cprintf("Recordes");
 
                 if (menu_opcao_atual == 3)
                     textcolor(RED);
@@ -508,7 +508,7 @@ int main()
                 gotoxy(COLUNAS / 2 - 8, ++j);
                 cprintf("Seus pontos: %4d", coletor_pontos);
 
-                i = COLUNAS / 2 - PONTUACAO_MAXIMO_TEXTO_LINHA / 2;
+                i = COLUNAS / 2 - RECORDE_MAXIMO_TEXTO_LINHA / 2;
                 j += 3;
 
                 gotoxy(COLUNAS / 2 - 4, j++);
@@ -518,15 +518,15 @@ int main()
                 for (int k = 0; k < 3; ++k, ++j) {
                     gotoxy(i, j);
 
-                    for (int l = 0; l < PONTUACAO_MAXIMO_TEXTO_LINHA; ++l)
+                    for (int l = 0; l < RECORDE_MAXIMO_TEXTO_LINHA; ++l)
                         cprintf(".");
 
                     gotoxy(i, j);
-                    for (l = 0; l < TAMANHO_NOME_PONTUACAO - 1; ++l)
-                        cprintf("%c ", toupper(pontuacao_nomes[k][l]));
+                    for (l = 0; l < TAMANHO_NOME_RECORDE - 1; ++l)
+                        cprintf("%c ", toupper(recorde_nomes[k][l]));
 
-                    gotoxy(i + PONTUACAO_MAXIMO_TEXTO_LINHA - 9, j++);
-                    cprintf(" %4d pts", pontuacao_maximas[k]);
+                    gotoxy(i + RECORDE_MAXIMO_TEXTO_LINHA - 9, j++);
+                    cprintf(" %4d pts", recorde_maximas[k]);
                 }
 
                 gotoxy(COLUNAS / 2 - 15, ++j);
@@ -534,7 +534,7 @@ int main()
 
                 redesenhar = 0;
             }
-        } else if (tela == TELA_PONTUACAO) {
+        } else if (tela == TELA_RECORDE) {
             if (key == 'b') {
                 tela = TELA_MENU;
 
