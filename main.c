@@ -45,9 +45,9 @@ int Sleep(long msec)
 #define TELA_GAMEOVER              3
 #define TELA_RECORDE               4
 
-#define NUMERO_RECORDES            6
-#define TAMANHO_NOME_RECORDE       4
-#define RECORDE_MAXIMO_TEXTO_LINHA 40
+#define NUMERO_RECORDES            3
+#define TAMANHO_NOME_RECORDE       7
+#define RECORDE_MAXIMO_TEXTO_LINHA 43
 
 
 /*********** Variáveis globais */
@@ -63,11 +63,11 @@ int coletor_pontos;
 int bola_pos_x;
 int bola_pos_y;
 
+int nove_recorde_index = -1;
+int recorde_maximos[NUMERO_RECORDES] = {0};
 char recorde_nomes[NUMERO_RECORDES][TAMANHO_NOME_RECORDE] = {
-    "JON", "JON", "JON", "JON", "JON", "JON",
+    "JONGAB", "JONGAB", "JONGAB",
 };
-
-int recorde_maximas[NUMERO_RECORDES] = {0};
 
 int sair_do_jogo = 0;
 int redesenhar = 1;
@@ -77,7 +77,7 @@ int redesenhar = 1;
 
 /* reinicia_jogo
  *
- * Função para reiniciar as variáveis do jogo tanto em caso de gameover quanto
+ * Função para reiniciar as variáveis do jogo tanto em caso de game over quanto
  * em caso de ser a primeira execução do jogo
  */
 void reinicia_jogo(void)
@@ -90,13 +90,15 @@ void reinicia_jogo(void)
     bola_pos_y = 2;
 }
 
+/* animacao_gameover
+ */
 void animacao_gameover(void)
 {
+    int i;
     int bolas[COLUNAS + 1] = {0};
 
     while (bolas[COLUNAS] <= LINHAS) {
-        /* Declarações no for não é ANSI C, ou seja, é algo inválido */
-        for (int i = 1; i <= COLUNAS; ++i) {
+        for (i = 1; i <= COLUNAS; ++i) {
             if (bolas[i] > 0) {
                 if (bolas[i] <= LINHAS) {
                     textbackground(WHITE);
@@ -120,7 +122,7 @@ void animacao_gameover(void)
             }
 
             if (i > 1)
-                bolas[i] += bolas[i] <= LINHAS && bolas[i - 1] > 2;
+                bolas[i] += bolas[i] <= LINHAS && bolas[i - 1] > 3;
             else
                 bolas[i] += bolas[i] <= LINHAS;
         }
@@ -137,12 +139,28 @@ void animacao_gameover(void)
     cprintf(" ");
 }
 
+/* novo_recorde
+ */
+int novo_recorde(void)
+{
+    int i;
+
+    for (i = 0; i < NUMERO_RECORDES; ++i) {
+        if (recorde_maximos[i] <= coletor_pontos) {
+            recorde_maximos[i] = coletor_pontos;
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 int main()
 {
     int clear_color1, clear_color2;
 
-    int i, j;
-    char key = 0;
+    int i, j, k;
+    char tecla = 0;
 
     clock_t temporizador = clock();
 
@@ -258,7 +276,7 @@ int main()
         if (tela == TELA_MENU) {
             redesenhar += 1;
 
-            if (key == '\r') {
+            if (tecla == '\r') {
                 switch (menu_opcao_atual) {
                 case 0:
                     clear_color1 = BLUE;
@@ -286,9 +304,9 @@ int main()
                 }
             }
 
-            if (key == 'w')
+            if (tecla == 'w')
                 menu_opcao_atual -= menu_opcao_atual > 0;
-            else if (key == 's')
+            else if (tecla == 's')
                 menu_opcao_atual += menu_opcao_atual < 3;
             else
                 redesenhar -= redesenhar > 0;
@@ -361,14 +379,14 @@ int main()
         } else if (tela == TELA_JOGO) {
             redesenhar += 1;
 
-            if (key == 'b') {
+            if (tecla == 'b') {
                 tela = TELA_MENU;
 
                 clear_color1 = BLACK;
                 clear_color2 = BLACK;
-            } else if (key == 'd') {
+            } else if (tecla == 'd') {
                 coletor_pos_x += coletor_pos_x + LARGURA_COLETOR <= COLUNAS;
-            } else if (key == 'a') {
+            } else if (tecla == 'a') {
                 coletor_pos_x -= coletor_pos_x > 1;
             } else {
                 redesenhar -= redesenhar > 0;
@@ -432,7 +450,7 @@ int main()
                 redesenhar = 0;
             }
         } else if (tela == TELA_REGRAS) {
-            if (key == 'b') {
+            if (tecla == 'b') {
                 tela = TELA_MENU;
 
                 clear_color1 = BLACK;
@@ -473,7 +491,7 @@ int main()
                 redesenhar = 0;
             }
         } else if (tela == TELA_GAMEOVER) {
-            if (key == 'b') {
+            if (tecla == 'b') {
                 tela = TELA_MENU;
 
                 clear_color1 = BLACK;
@@ -484,7 +502,11 @@ int main()
 
             if (redesenhar) {
                 i = COLUNAS / 2 - 32;
-                j = LINHAS / 2 - 9;
+
+                if ((nove_recorde_index = novo_recorde()) > -1)
+                    j = LINHAS / 2 - 9;
+                else
+                    j = LINHAS / 2 - 5;
 
                 textcolor(RED);
 
@@ -505,28 +527,37 @@ int main()
 
                 textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 8, ++j);
-                cprintf("Seus pontos: %4d", coletor_pontos);
+                if (nove_recorde_index > -1) {
+                    for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
 
-                i = COLUNAS / 2 - RECORDE_MAXIMO_TEXTO_LINHA / 2;
-                j += 3;
+                    gotoxy(COLUNAS / 2 - (15 + i) / 2, ++j);
+                    cprintf("Novo recorde: %d!", coletor_pontos);
 
-                gotoxy(COLUNAS / 2 - 4, j++);
-                cprintf("Recordes");
+                    j += 3;
+                    gotoxy(COLUNAS / 2 - 4, j++);
+                    cprintf("Recordes");
 
-                /* Declarações no for não é ANSI C, ou seja, é algo inválido */
-                for (int k = 0; k < 3; ++k, ++j) {
-                    gotoxy(i, j);
+                    for (k = 0; k < 3; ++k, ++j) {
+                        gotoxy(COLUNAS / 2 - RECORDE_MAXIMO_TEXTO_LINHA / 2, j);
 
-                    for (int l = 0; l < RECORDE_MAXIMO_TEXTO_LINHA; ++l)
-                        cprintf(".");
-
-                    gotoxy(i, j);
-                    for (l = 0; l < TAMANHO_NOME_RECORDE - 1; ++l)
-                        cprintf("%c ", toupper(recorde_nomes[k][l]));
-
-                    gotoxy(i + RECORDE_MAXIMO_TEXTO_LINHA - 9, j++);
-                    cprintf(" %4d pts", recorde_maximas[k]);
+                        for (i = 0; i < RECORDE_MAXIMO_TEXTO_LINHA; ++i) {
+                            if (i == 0 && (i += 3))
+                                cprintf("%d. ", k + 1);
+                            else if (i >= 4 && i - 4 < TAMANHO_NOME_RECORDE)
+                                cprintf("%c", recorde_nomes[k][i - 4]);
+                            else if (i - 4 == TAMANHO_NOME_RECORDE)
+                                cprintf(" ");
+                            else if (i == RECORDE_MAXIMO_TEXTO_LINHA - 9 && (i += 9))
+                                cprintf(" %4d pts", recorde_maximos[k]);
+                            else
+                                cprintf(".");
+                        }
+                    }
+                } else {
+                    for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
+                    gotoxy(COLUNAS / 2 - (15 + i) / 2, ++j);
+                    cprintf("Seus pontos: %d", coletor_pontos);
+                    j += 2;
                 }
 
                 gotoxy(COLUNAS / 2 - 15, ++j);
@@ -534,52 +565,12 @@ int main()
 
                 redesenhar = 0;
             }
-        } else if (tela == TELA_RECORDE) {
-            if (key == 'b') {
-                tela = TELA_MENU;
-
-                clear_color1 = BLACK;
-                clear_color2 = BLACK;
-            }
-
-            if (redesenhar) {
-                i = COLUNAS / 2 - PONTUACAO_MAXIMO_TEXTO_LINHA / 2;
-                j = LINHAS / 2 - (NUMERO_PONTUACOES * 2 + 3) / 2;
-
-                textcolor(RED);
-
-                gotoxy(COLUNAS / 2 - 5, j);
-                j += 2;
-                cprintf("PONTUAÇÕES");
-
-                textcolor(WHITE);
-
-                /* Declarações no for não é ANSI C, ou seja, é algo inválido */
-                for (int k = 0; k < NUMERO_PONTUACOES; ++k, ++j) {
-                    gotoxy(i, j);
-
-                    for (int l = 0; l < PONTUACAO_MAXIMO_TEXTO_LINHA; ++l)
-                        cprintf(".");
-
-                    gotoxy(i, j);
-                    for (l = 0; l < TAMANHO_NOME_PONTUACAO - 1; ++l)
-                        cprintf("%c ", toupper(pontuacao_nomes[k][l]));
-
-                    gotoxy(i + PONTUACAO_MAXIMO_TEXTO_LINHA - 9, j++);
-                    cprintf(" %4d pts", pontuacao_maximas[k]);
-                }
-
-                gotoxy(COLUNAS / 2 - 2, j + 1);
-                cprintf("<< b");
-
-                redesenhar = 0;
-            }
         }
 
         if (kbhit())
-            key = getch();
+            tecla = getch();
         else
-            key = 0;
+            tecla = 0;
 
         gotoxy(COLUNAS / 2, LINHAS);
     }
