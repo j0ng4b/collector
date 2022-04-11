@@ -43,7 +43,6 @@ int Sleep(long msec)
 #define TELA_JOGO                  1
 #define TELA_REGRAS                2
 #define TELA_GAMEOVER              3
-#define TELA_RECORDE               4
 
 #define NUMERO_RECORDES            3
 #define TAMANHO_NOME_RECORDE       7
@@ -297,13 +296,6 @@ int main()
                     tela = TELA_REGRAS;
                     break;
 
-                case 2:
-                    clear_color1 = BLACK;
-                    clear_color2 = BLACK;
-
-                    tela = TELA_RECORDE;
-                    break;
-
                 default:
                     sair_do_jogo = 1;
                 }
@@ -312,7 +304,7 @@ int main()
             if (tecla == 'w')
                 menu_opcao_atual -= menu_opcao_atual > 0;
             else if (tecla == 's')
-                menu_opcao_atual += menu_opcao_atual < 3;
+                menu_opcao_atual += menu_opcao_atual < 2;
             else
                 redesenhar -= redesenhar > 0;
 
@@ -354,14 +346,6 @@ int main()
                 cprintf("Regras");
 
                 if (menu_opcao_atual == 2)
-                    textcolor(RED);
-                else
-                    textcolor(WHITE);
-
-                gotoxy(COLUNAS / 2 - 4, ++j);
-                cprintf("Recordes");
-
-                if (menu_opcao_atual == 3)
                     textcolor(RED);
                 else
                     textcolor(WHITE);
