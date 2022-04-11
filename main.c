@@ -63,7 +63,8 @@ int coletor_pontos;
 int bola_pos_x;
 int bola_pos_y;
 
-int nove_recorde_index = -1;
+int recorde_nome_letra = 0;
+int novo_recorde_index = -1;
 int recorde_maximos[NUMERO_RECORDES] = {0};
 char recorde_nomes[NUMERO_RECORDES][TAMANHO_NOME_RECORDE] = {
     "JONGAB", "JONGAB", "JONGAB",
@@ -88,6 +89,9 @@ void reinicia_jogo(void)
 
     bola_pos_x = 1 + rand() % COLUNAS;
     bola_pos_y = 2;
+
+    novo_recorde_index = -1;
+    recorde_nome_letra = 0;
 }
 
 /* animacao_gameover
@@ -162,6 +166,7 @@ int main()
     int i, j, k;
     char tecla = 0;
 
+    char temporizador_flag = 0;
     clock_t temporizador = clock();
 
     srand(time(NULL));
@@ -491,7 +496,27 @@ int main()
                 redesenhar = 0;
             }
         } else if (tela == TELA_GAMEOVER) {
-            if (tecla == 'b') {
+            if (novo_recorde_index > -1
+                && recorde_nome_letra < TAMANHO_NOME_RECORDE - 1) {
+                redesenhar = 2;
+
+                if (isalnum(tecla) || tecla == ' ') {
+                    recorde_nomes[novo_recorde_index][recorde_nome_letra] = toupper(tecla);
+                    recorde_nome_letra += recorde_nome_letra < TAMANHO_NOME_RECORDE - 2;
+                } else if (tecla == 8 || tecla == 127) {
+                    recorde_nome_letra -= recorde_nome_letra > 0;
+                } else if (tecla == '\r') {
+                    recorde_nome_letra += recorde_nome_letra < TAMANHO_NOME_RECORDE - 1;
+                } else {
+                    redesenhar -= redesenhar == 2 ? 2 : 0;
+                }
+
+                if ((clock() - temporizador) / (double) CLOCKS_PER_SEC > 0.3) {
+                    temporizador_flag = !temporizador_flag;
+                    temporizador = clock();
+                    redesenhar = 2;
+                }
+            } else if (tecla == 'b') {
                 tela = TELA_MENU;
 
                 clear_color1 = BLACK;
@@ -500,10 +525,10 @@ int main()
                 reinicia_jogo();
             }
 
-            if (redesenhar) {
+            if (redesenhar == 1) {
                 i = COLUNAS / 2 - 32;
 
-                if ((nove_recorde_index = novo_recorde()) > -1)
+                if ((novo_recorde_index = novo_recorde()) > -1)
                     j = LINHAS / 2 - 9;
                 else
                     j = LINHAS / 2 - 5;
@@ -527,7 +552,7 @@ int main()
 
                 textcolor(WHITE);
 
-                if (nove_recorde_index > -1) {
+                if (novo_recorde_index > -1) {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
 
                     gotoxy(COLUNAS / 2 - (15 + i) / 2, ++j);
@@ -553,6 +578,9 @@ int main()
                                 cprintf(".");
                         }
                     }
+
+                    gotoxy(1, LINHAS);
+                    cprintf("↲: confirmar letra/nome");
                 } else {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
                     gotoxy(COLUNAS / 2 - (15 + i) / 2, ++j);
@@ -562,6 +590,19 @@ int main()
 
                 gotoxy(COLUNAS / 2 - 15, ++j);
                 cprintf("Precione b para voltar ao menu");
+
+                redesenhar = 0;
+            } else if (redesenhar == 2) {
+                i = COLUNAS / 2 - RECORDE_MAXIMO_TEXTO_LINHA / 2 + 3;
+                j = LINHAS / 2 + novo_recorde_index + 3;
+
+                gotoxy(i, j);
+                cprintf("%s", recorde_nomes[novo_recorde_index]);
+
+                gotoxy(i + recorde_nome_letra, j);
+                if (temporizador_flag
+                    && recorde_nome_letra < TAMANHO_NOME_RECORDE - 1)
+                    cprintf("_");
 
                 redesenhar = 0;
             }
