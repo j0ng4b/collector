@@ -5,37 +5,12 @@
 
 #include <conio2.h>
 
-#ifdef _WIN32
-#   include <windows.h>
-#elif defined(__linux__)
-#   include <errno.h>
-
-int Sleep(long msec)
-{
-    struct timespec ts;
-    int res;
-
-    if (msec < 0)
-    {
-        errno = EINVAL;
-        return -1;
-    }
-
-    ts.tv_sec = msec / 1000;
-    ts.tv_nsec = (msec % 1000) * 1000000;
-
-    do {
-        res = nanosleep(&ts, &ts);
-    } while (res && errno == EINTR);
-
-    return res;
-}
-#endif
-
-
 /*********** Definições */
 #define COLUNAS                    80
 #define LINHAS                     24
+
+#define METADE_COLUNAS             (COLUNAS / 2)
+#define METADE_LINHAS              (LINHAS / 2)
 
 #define LARGURA_COLETOR            10
 
@@ -69,11 +44,22 @@ char recorde_nomes[NUMERO_RECORDES][TAMANHO_NOME_RECORDE] = {
     "JONGAB", "JONGAB", "JONGAB",
 };
 
+char linha_caracteres[COLUNAS];
 int sair_do_jogo = 0;
 int redesenhar = 1;
 
 
 /*********** Funções */
+
+/* msleep
+ *
+ * Função para pausar a execução do programa em alguns milisegundos.
+ */
+void msleep(int msec)
+{
+    clock_t start = clock();
+    while ((clock() - start) / (double) CLOCKS_PER_SEC < msec / 1000.0);
+}
 
 /* reinicia_jogo
  *
@@ -82,18 +68,20 @@ int redesenhar = 1;
  */
 void reinicia_jogo(void)
 {
-    coletor_pos_x = COLUNAS / 2 - LARGURA_COLETOR / 2;
+    coletor_pos_x = METADE_COLUNAS - LARGURA_COLETOR / 2;
     coletor_pos_y = LINHAS * 0.8;
     coletor_pontos = 0;
 
     bola_pos_x = 1 + rand() % COLUNAS;
-    bola_pos_y = 2;
+    bola_pos_y = 1;
 
     novo_recorde_index = -1;
     recorde_nome_letra = 0;
 }
 
 /* animacao_gameover
+ *
+ * Função para criar uma animação de várias bolinhas caindo.
  */
 void animacao_gameover(void)
 {
@@ -143,6 +131,11 @@ void animacao_gameover(void)
 }
 
 /* novo_recorde
+ *
+ * Função para verificar se o jogador conseguiu atingir uma nova pontuação
+ * máxima. Se ele conseguiu retorna a posição dessa nova pontuação na lista de
+ * recordes e atribuí essa nova pontuação na lista de recordes, do contrário
+ * apenas retorna -1.
  */
 int novo_recorde(void)
 {
@@ -158,7 +151,7 @@ int novo_recorde(void)
     return -1;
 }
 
-int main()
+int main(void)
 {
     int clear_color1, clear_color2;
 
@@ -170,28 +163,29 @@ int main()
 
     srand(time(NULL));
     setlocale(LC_ALL, "pt_BR.UTF-8");
-
     reinicia_jogo();
-    for (i = 1; i <= LINHAS; ++i) {
-        for (j = 1; j <= COLUNAS; ++j) {
-            gotoxy(j, i);
 
-            if (i == 1 || i == LINHAS) {
-                if (j == 1 || j == COLUNAS)
-                    cprintf("+");
-                else
-                    cprintf(" ");
-            } else {
-                if (j == 1 || j == COLUNAS)
-                    cprintf(":");
-                else
-                    cprintf(" ");
-            }
+    for (i = 0; i < COLUNAS; ++i)
+        linha_caracteres[i] = ' ';
+
+    for (i = 1; i <= LINHAS; ++i) {
+        if (i == 1 || i == LINHAS) {
+            gotoxy(1, i);
+            cprintf("+");
+
+            gotoxy(COLUNAS, i);
+            cprintf("+");
+        } else {
+            gotoxy(1, i);
+            cprintf(":");
+
+            gotoxy(COLUNAS, i);
+            cprintf(":");
         }
     }
 
-    i = COLUNAS / 2 - 36;
-    j = LINHAS / 2 - 3;
+    i = METADE_COLUNAS - 36;
+    j = METADE_LINHAS  - 3;
 
     gotoxy(i, j++);
     cprintf("_______ _______ ___     ___     _______ _______ _______ _______ _______");
@@ -210,15 +204,15 @@ int main()
 
     i = 1;
     do {
-        gotoxy(COLUNAS / 2 - 18, LINHAS * 0.8);
+        gotoxy(METADE_COLUNAS - 18, LINHAS * 0.8);
 
         if ((i = !i))
             cprintf("Precione qualquer tecla para iniciar!");
         else
             cprintf("                                     ");
 
-        gotoxy(COLUNAS / 2, LINHAS);
-        Sleep(500);
+        gotoxy(METADE_COLUNAS, LINHAS);
+        msleep(500);
     } while (!kbhit());
 
     clear_color1 = BLACK;
@@ -232,45 +226,45 @@ int main()
             if (tela == TELA_GAMEOVER) {
                 animacao_gameover();
             } else {
-                for (i = 1; i <= LINHAS / 2; ++i) {
-                    for (j = 1; j <= COLUNAS; ++j) {
-                        textbackground(WHITE);
-                        gotoxy(j, i);
-                        cprintf(" ");
+                for (i = 1; i <= METADE_LINHAS; ++i) {
+                    textbackground(WHITE);
 
-                        gotoxy(j, LINHAS - (i - 1));
-                        cprintf(" ");
+                    gotoxy(1, i);
+                    cprintf("%s", linha_caracteres);
 
-                        if (i > 1) {
-                            textbackground(clear_color1);
-                            textcolor(clear_color1);
-                            gotoxy(j, i - 1);
-                            cprintf(" ");
+                    gotoxy(1, LINHAS - (i - 1));
+                    cprintf("%s", linha_caracteres);
 
-                            if (i <= LINHAS * 0.2)
-                                textbackground(clear_color2);
+                    if (i > 1) {
+                        textbackground(clear_color1);
+                        textcolor(clear_color1);
 
-                            gotoxy(j, LINHAS - (i - 2));
-                            cprintf(" ");
-                        }
+                        gotoxy(1, i - 1);
+                        cprintf("%s", linha_caracteres);
+
+                        if (i <= LINHAS * 0.2)
+                            textbackground(clear_color2);
+
+                        gotoxy(1, LINHAS - (i - 2));
+                        cprintf("%s", linha_caracteres);
                     }
 
-                    gotoxy(COLUNAS / 2, LINHAS / 2);
-                    Sleep(20);
+                    gotoxy(METADE_COLUNAS, METADE_LINHAS);
+                    msleep(50);
                 }
 
                 textbackground(clear_color1);
-                for (j = COLUNAS / 2; j > 0; --j) {
+                for (j = METADE_COLUNAS; j > 0; --j) {
                     for (i = 0; i < 2; ++i) {
-                        gotoxy(j, LINHAS / 2 + i);
+                        gotoxy(j, METADE_LINHAS + i);
                         cprintf(" ");
 
-                        gotoxy(COLUNAS - (j - 1), LINHAS / 2 + i);
+                        gotoxy(COLUNAS - (j - 1), METADE_LINHAS + i);
                         cprintf(" ");
                     }
 
-                    gotoxy(COLUNAS / 2, LINHAS);
-                    Sleep(15);
+                    gotoxy(METADE_COLUNAS, LINHAS);
+                    msleep(30);
                 }
             }
 
@@ -311,7 +305,7 @@ int main()
             if (redesenhar) {
                 textcolor(WHITE);
 
-                i = COLUNAS / 2 - 36;
+                i = METADE_COLUNAS - 36;
                 j = LINHAS * 0.3;
 
                 gotoxy(i, j++);
@@ -334,7 +328,7 @@ int main()
                 else
                     textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 3, ++j);
+                gotoxy(METADE_COLUNAS - 3, ++j);
                 cprintf("Iniciar");
 
                 if (menu_opcao_atual == 1)
@@ -342,7 +336,7 @@ int main()
                 else
                     textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 3, ++j);
+                gotoxy(METADE_COLUNAS - 3, ++j);
                 cprintf("Regras");
 
                 if (menu_opcao_atual == 2)
@@ -350,7 +344,7 @@ int main()
                 else
                     textcolor(WHITE);
 
-                gotoxy(COLUNAS / 2 - 2, ++j);
+                gotoxy(METADE_COLUNAS - 2, ++j);
                 cprintf("Sair");
 
                 textcolor(WHITE);
@@ -447,12 +441,12 @@ int main()
             }
 
             if (redesenhar) {
-                i = COLUNAS / 2 - 26;
-                j = LINHAS / 2 - 4;
+                i = METADE_COLUNAS - 26;
+                j = METADE_LINHAS  - 4;
 
                 textcolor(RED);
 
-                gotoxy(COLUNAS / 2 - 3, j - 2);
+                gotoxy(METADE_COLUNAS - 3, j - 2);
                 cprintf("REGRAS");
 
                 textcolor(WHITE);
@@ -474,7 +468,7 @@ int main()
                 gotoxy(i, j++);
                 cprintf("   a barra (coletor) até o ítem para coleta-lo.");
 
-                gotoxy(COLUNAS / 2 - 2, j + 2);
+                gotoxy(METADE_COLUNAS - 2, j + 2);
                 cprintf("<< b");
 
                 redesenhar = 0;
@@ -510,12 +504,12 @@ int main()
             }
 
             if (redesenhar == 1) {
-                i = COLUNAS / 2 - 32;
+                i = METADE_COLUNAS - 32;
 
                 if ((novo_recorde_index = novo_recorde()) > -1)
-                    j = LINHAS / 2 - 9;
+                    j = METADE_LINHAS - 9;
                 else
-                    j = LINHAS / 2 - 5;
+                    j = METADE_LINHAS - 5;
 
                 textcolor(RED);
 
@@ -539,15 +533,15 @@ int main()
                 if (novo_recorde_index > -1) {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
 
-                    gotoxy(COLUNAS / 2 - (15 + i) / 2, ++j);
+                    gotoxy(METADE_COLUNAS - (15 + i) / 2, ++j);
                     cprintf("Novo recorde: %d!", coletor_pontos);
 
                     j += 3;
-                    gotoxy(COLUNAS / 2 - 4, j++);
+                    gotoxy(METADE_COLUNAS - 4, j++);
                     cprintf("Recordes");
 
                     for (k = 0; k < 3; ++k, ++j) {
-                        gotoxy(COLUNAS / 2 - RECORDE_MAXIMO_TEXTO_LINHA / 2, j);
+                        gotoxy(METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2, j);
 
                         for (i = 0; i < RECORDE_MAXIMO_TEXTO_LINHA; ++i) {
                             if (i == 0 && (i += 3))
@@ -567,18 +561,18 @@ int main()
                     cprintf("↲: confirmar letra/nome");
                 } else {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
-                    gotoxy(COLUNAS / 2 - (15 + i) / 2, ++j);
+                    gotoxy(METADE_COLUNAS - (15 + i) / 2, ++j);
                     cprintf("Seus pontos: %d", coletor_pontos);
                     j += 2;
                 }
 
-                gotoxy(COLUNAS / 2 - 15, ++j);
+                gotoxy(METADE_COLUNAS - 15, ++j);
                 cprintf("Precione b para voltar ao menu");
 
                 redesenhar = 0;
             } else if (redesenhar == 2) {
-                i = COLUNAS / 2 - RECORDE_MAXIMO_TEXTO_LINHA / 2 + 3;
-                j = LINHAS / 2 + novo_recorde_index + 3;
+                i = METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2 + 3;
+                j = METADE_LINHAS  + novo_recorde_index + 3;
 
                 gotoxy(i, j);
                 cprintf("%s", recorde_nomes[novo_recorde_index]);
@@ -597,7 +591,7 @@ int main()
         else
             tecla = 0;
 
-        gotoxy(COLUNAS / 2, LINHAS);
+        gotoxy(METADE_COLUNAS, LINHAS);
     }
 
     return 0;
