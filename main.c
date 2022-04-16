@@ -139,11 +139,29 @@ void animacao_gameover(void)
  */
 int novo_recorde(void)
 {
-    int i;
+    int i, j, k, tmp;
 
     for (i = 0; i < NUMERO_RECORDES; ++i) {
-        if (recorde_maximos[i] <= coletor_pontos) {
-            recorde_maximos[i] = coletor_pontos;
+        if (recorde_maximos[i] < coletor_pontos) {
+            recorde_maximos[NUMERO_RECORDES - 1] = coletor_pontos;
+
+            for (k = 0; k < TAMANHO_NOME_RECORDE - 1; ++k)
+                recorde_nomes[NUMERO_RECORDES - 1][k] = 'A';
+
+            for (j = NUMERO_RECORDES - 1; j > i; --j){
+                if (recorde_maximos[j] > recorde_maximos[j - 1]) {
+                    tmp = recorde_maximos[j - 1];
+                    recorde_maximos[j - 1] = recorde_maximos[j];
+                    recorde_maximos[j] = tmp;
+
+                    for (k = 0; k < TAMANHO_NOME_RECORDE - 1; ++k) {
+                        tmp = recorde_nomes[j - 1][k];
+                        recorde_nomes[j - 1][k] = recorde_nomes[j][k];
+                        recorde_nomes[j][k] = tmp;
+                    }
+                }
+            }
+
             return i;
         }
     }
@@ -533,8 +551,8 @@ int main(void)
                 if (novo_recorde_index > -1) {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
 
-                    gotoxy(METADE_COLUNAS - (15 + i) / 2, ++j);
-                    cprintf("Novo recorde: %d!", coletor_pontos);
+                    gotoxy(METADE_COLUNAS - (19 + i) / 2, ++j);
+                    cprintf("Novo recorde: %d pts!", coletor_pontos);
 
                     j += 3;
                     gotoxy(METADE_COLUNAS - 4, j++);
@@ -561,8 +579,8 @@ int main(void)
                     cprintf("↲: confirmar letra/nome");
                 } else {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
-                    gotoxy(METADE_COLUNAS - (15 + i) / 2, ++j);
-                    cprintf("Seus pontos: %d", coletor_pontos);
+                    gotoxy(METADE_COLUNAS - (17 + i) / 2, ++j);
+                    cprintf("Seus pontos: %d pts", coletor_pontos);
                     j += 2;
                 }
 
