@@ -44,7 +44,7 @@ char recorde_nomes[NUMERO_RECORDES][TAMANHO_NOME_RECORDE] = {
     "JONGAB", "JONGAB", "JONGAB",
 };
 
-char linha_caracteres[COLUNAS];
+char linha_caracteres[COLUNAS] = {0};
 int sair_do_jogo = 0;
 int redesenhar = 1;
 
