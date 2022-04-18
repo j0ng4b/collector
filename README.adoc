@@ -1,0 +1,19 @@
+= Collector
+
+Um jogo simples onde seu único objetivo é pegar o maior número possível de
+objetos que caem aleatoriamente ao logo da tela :)
+
+== Como jogar?
+
+. *Movimento*: é dado através das teclas `a` e `d`, mover para direita, mover para
+esquerda respectivamente.
+. *Pontuação*: a cada item coletado é somado um ponto.
+. *Recordes*: se tiver conseguido uma pontuação maior do que qualquer uma das
+maiores, você poderá colocar seu nome com até seis letras.
+. *Fim de jogo*: caso você não consiga pegar o item o jogo acaba.
+
+== Licença
+
+O jogo é licenciado sob os termos da licença xref:LICENSE[MIT], veja o arquivo link:LICENSE[LISENCE] para
+mais informações.
+
