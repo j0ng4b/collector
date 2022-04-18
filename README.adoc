@@ -14,6 +14,7 @@ maiores, você poderá colocar seu nome com até seis letras.
 
 == Licença
 
-O jogo é licenciado sob os termos da licença link:LICENSE[MIT], veja o arquivo link:LICENSE[LISENCE] para
+O jogo é licenciado sob os termos da licença link:LICENSE[MIT]. Veja o arquivo
+link:LICENSE[LICENSE] para
 mais informações.
 
