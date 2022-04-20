@@ -139,27 +139,21 @@ void animacao_gameover(void)
  */
 int novo_recorde(void)
 {
-    int i, j, k, tmp;
+    int i, j, k;
 
     for (i = 0; i < NUMERO_RECORDES; ++i) {
         if (recorde_maximos[i] < coletor_pontos) {
-            recorde_maximos[NUMERO_RECORDES - 1] = coletor_pontos;
+            /* Move todos os recordes uma posição para baixo. Na posição do novo
+             * recorde a nova pontuação é atribuída e o antigo nome é
+             * substituído.
+             */
+            for (j = NUMERO_RECORDES - 1; j >= i; --j) {
+                recorde_maximos[j] = j == i ?
+                    coletor_pontos : recorde_maximos[j - 1];
 
-            for (k = 0; k < TAMANHO_NOME_RECORDE - 1; ++k)
-                recorde_nomes[NUMERO_RECORDES - 1][k] = 'A';
-
-            for (j = NUMERO_RECORDES - 1; j > i; --j){
-                if (recorde_maximos[j] > recorde_maximos[j - 1]) {
-                    tmp = recorde_maximos[j - 1];
-                    recorde_maximos[j - 1] = recorde_maximos[j];
-                    recorde_maximos[j] = tmp;
-
-                    for (k = 0; k < TAMANHO_NOME_RECORDE - 1; ++k) {
-                        tmp = recorde_nomes[j - 1][k];
-                        recorde_nomes[j - 1][k] = recorde_nomes[j][k];
-                        recorde_nomes[j][k] = tmp;
-                    }
-                }
+                for (k = 0; k < TAMANHO_NOME_RECORDE - 1; ++k)
+                    recorde_nomes[j][k] = j == i ?
+                        'A' : recorde_nomes[j - 1][k];
             }
 
             return i;
