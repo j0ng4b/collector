@@ -179,7 +179,7 @@ int main(void)
     clock_t temporizador = clock();
 
     srand(time(NULL));
-    setlocale(LC_ALL,"");
+    setlocale(LC_ALL, "");
     reinicia_jogo();
 
     for (i = 0; i < COLUNAS; ++i)
@@ -591,6 +591,9 @@ int main(void)
 
                     gotoxy(1, LINHAS - 3);
                     cprintf("Digite as letras do seu nome ou espaços");
+
+                    gotoxy(1, LINHAS - 2);
+                    cprintf("⌫: volta para letra anterior");
 
                     gotoxy(1, LINHAS - 1);
                     cprintf("↲: confirmar letra/nome");
