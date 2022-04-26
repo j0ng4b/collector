@@ -372,7 +372,7 @@ int main(void)
                 cprintf("s: seta para baixo");
 
                 gotoxy(1, LINHAS - 0);
-                cprintf("↲: confirmar seleção");
+                cprintf("enter: confirmar selecao");
 
                 redesenhar = 0;
             }
@@ -479,25 +479,25 @@ int main(void)
                 textcolor(WHITE);
 
                 gotoxy(i, j++);
-                cprintf("1. Ao iniciar o jogo as teclas responsáveis por mover");
+                cprintf("1. Ao iniciar o jogo as teclas responsaveis por mover");
                 gotoxy(i, j++);
-                cprintf("   a barra (coletor) serão a e d.");
+                cprintf("   a barra (coletor) serao a e d.");
 
                 ++j;
                 gotoxy(i, j++);
-                cprintf("2. Quando o jogo for iniciado o objetivo será não");
+                cprintf("2. Quando o jogo for iniciado o objetivo sera nao");
                 gotoxy(i, j++);
-                cprintf("   deixar nenhum ítem cair no chão.");
+                cprintf("   deixar nenhum item cair no chao.");
 
                 ++j;
                 gotoxy(i, j++);
-                cprintf("3. Para contabilizar os pontos será necessário guiar");
+                cprintf("3. Para contabilizar os pontos sera necessario guiar");
                 gotoxy(i, j++);
-                cprintf("   a barra (coletor) até o ítem para coleta-lo.");
+                cprintf("   a barra (coletor) ate o item para coleta-lo.");
 
                 ++j;
                 gotoxy(i, j++);
-                cprintf("4. A cada certa pontuação a dificuldade aumenta.");
+                cprintf("4. A cada certa pontuacao a dificuldade aumenta.");
                 ++j;
 
                 gotoxy(METADE_COLUNAS - 2, j + 2);
@@ -593,10 +593,10 @@ int main(void)
                     cprintf("Digite as letras do seu nome ou espaços");
 
                     gotoxy(1, LINHAS - 2);
-                    cprintf("⌫: volta para letra anterior");
+                    cprintf("backpace: volta para letra anterior");
 
                     gotoxy(1, LINHAS - 1);
-                    cprintf("↲: confirmar letra/nome");
+                    cprintf("enter: confirmar letra/nome");
                 } else {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
 
