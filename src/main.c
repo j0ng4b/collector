@@ -26,7 +26,7 @@
 
 /*********** Variáveis globais */
 int menu_opcao_atual = 0;
-float vel_ball;
+
 int tela = TELA_MENU;
 int tela_anterior = -1;
 
@@ -37,6 +37,7 @@ int vell_coletor;
 
 int bola_pos_x;
 int bola_pos_y;
+float bola_velocidade;
 
 int recorde_nome_letra = 0;
 int novo_recorde_index = -1;
@@ -75,10 +76,10 @@ void reinicia_jogo(void)
 
     bola_pos_x = 1 + rand() % COLUNAS;
     bola_pos_y = 1;
+    bola_velocidade = 0.3;
 
     novo_recorde_index = -1;
     recorde_nome_letra = 0;
-    vel_ball = 0.3;
 }
 
 /* animacao_gameover
@@ -164,6 +165,8 @@ int novo_recorde(void)
 
     return -1;
 }
+
+/* TODO: funções para cada tela */
 
 int main(void)
 {
@@ -389,24 +392,21 @@ int main(void)
                 redesenhar -= redesenhar > 0;
             }
 
-            if ((clock() - temporizador) / (double) CLOCKS_PER_SEC > vel_ball) {
+            if ((clock() - temporizador) / (double) CLOCKS_PER_SEC > bola_velocidade) {
                 ++bola_pos_y;
                 redesenhar = 1;
                 temporizador = clock();
             }
-                if(coletor_pontos==5){
-                    vel_ball=0.2;
-                }
-              if(coletor_pontos==10){
-                 vel_ball=0.1;
-             }
-               if(coletor_pontos==30){
-                vel_ball=0.005;
-             }
-             if(coletor_pontos==40){
-                vel_ball=0.003;
-             }
 
+            if (coletor_pontos == 5) {
+                bola_velocidade = 0.2;
+            } else if (coletor_pontos == 10) {
+                bola_velocidade = 0.1;
+            } else if (coletor_pontos == 30) {
+                bola_velocidade = 0.005;
+            } else if(coletor_pontos == 40) {
+                bola_velocidade = 0.003;
+            }
 
             if (bola_pos_y == coletor_pos_y) {
                 if (bola_pos_x >= coletor_pos_x
@@ -497,10 +497,8 @@ int main(void)
 
                 ++j;
                 gotoxy(i, j++);
-                cprintf("4. A cada 10 pontos o nível de dificuldade aumenta ");
+                cprintf("4. A cada certa pontuação a dificuldade aumenta.");
                 ++j;
-
-
 
                 gotoxy(METADE_COLUNAS - 2, j + 2);
                 cprintf("<< b");
@@ -590,12 +588,15 @@ int main(void)
                                 cprintf(".");
                         }
                     }
-                    gotoxy(1,LINHAS-2);
-                    cprintf(" 1. Digite as letras do seu nome");
-                    gotoxy(2, LINHAS-1);
-                    cprintf("2. ↲: confirmar letra/nome");
+
+                    gotoxy(1, LINHAS - 3);
+                    cprintf("Digite as letras do seu nome ou espaços");
+
+                    gotoxy(1, LINHAS - 1);
+                    cprintf("↲: confirmar letra/nome");
                 } else {
                     for (i = 1, k = 1; coletor_pontos / k; ++i, k *= 10);
+
                     gotoxy(METADE_COLUNAS - (17 + i) / 2, ++j);
                     cprintf("Seus pontos: %d pts", coletor_pontos);
                     j += 2;
