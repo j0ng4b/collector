@@ -18,6 +18,7 @@
 #define TELA_JOGO                  1
 #define TELA_REGRAS                2
 #define TELA_GAMEOVER              3
+#define TELA_DIFICULDADES          4
 
 #define NUMERO_RECORDES            3
 #define TAMANHO_NOME_RECORDE       7
@@ -43,8 +44,10 @@ int recorde_nome_letra = 0;
 int novo_recorde_index = -1;
 int recorde_maximos[NUMERO_RECORDES] = {0};
 char recorde_nomes[NUMERO_RECORDES][TAMANHO_NOME_RECORDE] = {
-    "JONGAB", "JONGAB", "JONGAB",
+    "FELIPE", "IGOR  ", "J0NG4B",
 };
+
+int dificuldade = 0;
 
 char linha_caracteres[COLUNAS] = {0};
 int sair_do_jogo = 0;
@@ -303,10 +306,10 @@ int main(void)
             if (tecla == '\r') {
                 switch (menu_opcao_atual) {
                 case 0:
-                    clear_color1 = BLUE;
-                    clear_color2 = GREEN;
+                    clear_color1 = BLACK;
+                    clear_color2 = BLACK;
 
-                    tela = TELA_JOGO;
+                    tela = TELA_DIFICULDADES;
                     break;
 
                 case 1:
@@ -385,6 +388,93 @@ int main(void)
 
                 redesenhar = 0;
             }
+        } else if (tela == TELA_DIFICULDADES) {
+            redesenhar += 1;
+
+            if (tecla == 'a') {
+                dificuldade -= dificuldade > 0;
+            } else if (tecla == 'd') {
+                dificuldade += dificuldade < 2;
+            } else if (tecla == 'b') {
+                clear_color1 = BLACK;
+                clear_color2 = BLACK;
+
+                tela = TELA_MENU;
+            } else if (tecla == '\r') {
+                clear_color1 = BLUE;
+                clear_color2 = GREEN;
+
+                tela = TELA_JOGO;
+            } else {
+                redesenhar -= redesenhar > 0;
+            }
+
+            if (redesenhar) {
+                j = METADE_LINHAS - 4;
+
+                /* TODO: uma tela mais bonitinha com uma descrição do nível */
+
+                textcolor(WHITE);
+
+                gotoxy(METADE_COLUNAS - 7, j++);
+                cprintf("Nivel inicial");
+
+                if (dificuldade == 0)
+                    textcolor(RED);
+                else
+                    textcolor(WHITE);
+
+                gotoxy(METADE_COLUNAS - 11, ++j);
+                cprintf("Facil");
+
+                if (dificuldade == 1)
+                    textcolor(RED);
+                else
+                    textcolor(WHITE);
+
+                gotoxy(METADE_COLUNAS - 3, j);
+                cprintf("Medio");
+
+                if (dificuldade == 2)
+                    textcolor(RED);
+                else
+                    textcolor(WHITE);
+
+                gotoxy(METADE_COLUNAS + 5, j++);
+                cprintf("Dificil");
+
+                j += 2;
+
+                textcolor(WHITE);
+
+                gotoxy(METADE_COLUNAS - 4, j++);
+                cprintf("Recordes");
+
+                for (k = 0; k < 3; ++k, ++j) {
+                    gotoxy(METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2, j);
+
+                    for (i = 0; i < RECORDE_MAXIMO_TEXTO_LINHA; ++i) {
+                        if (i == 0 && (i += 3))
+                            cprintf("%d. ", k + 1);
+                        else if (i >= 4 && i - 4 < TAMANHO_NOME_RECORDE)
+                            cprintf("%c", recorde_nomes[k][i - 4]);
+                        else if (i - 4 == TAMANHO_NOME_RECORDE)
+                            cprintf(" ");
+                        else if (i == RECORDE_MAXIMO_TEXTO_LINHA - 9 && (i += 9))
+                            cprintf(" %4d pts", recorde_maximos[k]);
+                        else
+                            cprintf(".");
+                    }
+                }
+
+                gotoxy(1, LINHAS - 1);
+                cprintf("b: volta para o menu");
+
+                gotoxy(1, LINHAS - 0);
+                cprintf("enter: seleciona o nivel inicial");
+
+                redesenhar = 0;
+            }
         } else if (tela == TELA_JOGO) {
             redesenhar += 1;
 
@@ -407,14 +497,16 @@ int main(void)
                 temporizador = clock();
             }
 
-            if (coletor_pontos == 5) {
-                bola_velocidade = 0.2;
+            if (coletor_pontos == 0) {
+                bola_velocidade = 0.3 / (dificuldade + 1);
+            } else if (coletor_pontos == 5) {
+                bola_velocidade = 0.2 / (dificuldade + 1);
             } else if (coletor_pontos == 10) {
-                bola_velocidade = 0.1;
+                bola_velocidade = 0.1 / (dificuldade + 1);
             } else if (coletor_pontos == 30) {
-                bola_velocidade = 0.005;
+                bola_velocidade = 0.005 / (dificuldade + 1);
             } else if(coletor_pontos == 40) {
-                bola_velocidade = 0.003;
+                bola_velocidade = 0.003 / (dificuldade + 1);
             }
 
             if (bola_pos_y == coletor_pos_y) {
