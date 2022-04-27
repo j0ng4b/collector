@@ -59,7 +59,16 @@ int redesenhar = 1;
  */
 void msleep(int msec)
 {
+    /* A função clock retorna o tempo aproximado do processador usado pelo
+     * processo desde o seu início. Esse tempo é convertido em segundos se
+     * dividido por CLOCKS_PER_SEC.
+     */
     clock_t start = clock();
+
+    /* Parecido com o campo da física com delta T, mas nesse caso verifica se
+     * delta T passou de um determinado limite de tempo em segundos, caso
+     * não tenha passado espera até que passe.
+     */
     while ((clock() - start) / (double) CLOCKS_PER_SEC < msec / 1000.0);
 }
 
