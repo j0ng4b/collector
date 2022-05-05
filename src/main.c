@@ -6,24 +6,30 @@
 #include <conio2.h>
 
 /*********** Definições */
-#define COLUNAS                    80
-#define LINHAS                     24
+#define COLUNAS                       80
+#define LINHAS                        24
 
-#define METADE_COLUNAS             (COLUNAS / 2)
-#define METADE_LINHAS              (LINHAS / 2)
+#define METADE_COLUNAS                (COLUNAS / 2)
+#define METADE_LINHAS                 (LINHAS / 2)
 
-#define LARGURA_COLETOR            10
+#define LARGURA_COLETOR               10
 
-#define TELA_MENU                  0
-#define TELA_JOGO                  1
-#define TELA_REGRAS                2
-#define TELA_GAMEOVER              3
-#define TELA_DIFICULDADES          4
+#define TELA_MENU                     0
+#define TELA_JOGO                     1
+#define TELA_REGRAS                   2
+#define TELA_GAMEOVER                 3
+#define TELA_DIFICULDADES             4
 
-#define NUMERO_RECORDES            3
-#define TAMANHO_NOME_RECORDE       7
-#define RECORDE_MAXIMO_TEXTO_LINHA 43
+#define NUMERO_RECORDES               3
+#define TAMANHO_NOME_RECORDE          7
+#define RECORDE_MAXIMO_TEXTO_LINHA    43
 
+#define JANELA_LARGURA_MAXIMA         (COLUNAS * 80 / 100)
+#define JANELA_ALTURA_MAXIMA          (LINHAS * 80 / 100)
+#define JANELA_TAMANHO_TITULO         (JANELA_LARGURA_MAXIMA - 10)
+#define JANELA_TAMANHO_MENSAGEM_LINHA (JANELA_LARGURA_MAXIMA - 4)
+#define JANELA_TAMANHO_MENSAGEM       \
+    ((JANELA_LARGURA_MAXIMA - 4) * (JANELA_ALTURA_MAXIMA - 4))
 
 /*********** Variáveis globais */
 int menu_opcao_atual = 0;
@@ -180,6 +186,144 @@ int novo_recorde(void)
 
 /* TODO: funções para cada tela */
 
+enum janela_evento {
+    JANELA_EVENTO_ESCONDIDA,
+    JANELA_EVENTO_EXIBIDA,
+    JANELA_EVENTO_NENHUM,
+};
+
+struct janela {
+    int x, y;
+
+    int largura;
+    int altura;
+
+    char titulo[JANELA_TAMANHO_TITULO];
+    char mensagem[JANELA_ALTURA_MAXIMA][JANELA_TAMANHO_MENSAGEM_LINHA];
+    int mensagem_linhas;
+
+    enum janela_evento evento;
+
+    int redesenhar;
+    int visivel;
+    int criada;
+};
+
+struct janela nova_janela(int largura, int altura, char titulo[], char mensagem[])
+{
+    int i, msg_pos;
+    struct janela janela = { 0 };
+
+    if (strlen(titulo) > JANELA_TAMANHO_TITULO)
+        return janela;
+
+    /* Ajusta a largura da janela para uma largura válida, isto é, dentro de um
+     * limite máximo e mínimo.
+     */
+    if (largura == 0 || largura > JANELA_LARGURA_MAXIMA)
+        largura = JANELA_LARGURA_MAXIMA;
+    else if (largura < (int) strlen(titulo))
+        largura = strlen(titulo) + 10;
+
+    /* Faz o mesmo que foi feito com a largura, mas agora com a altura */
+    if (altura == 0 || altura > JANELA_ALTURA_MAXIMA)
+        altura = JANELA_ALTURA_MAXIMA;
+
+    janela.largura = largura;
+    janela.altura = altura;
+
+    /* Copiá a mensagem para a área de mensagem da janela respeitando o tamanho
+     * máximo da janela, caso esse tamanho seja ultrapassado a mensagem
+     * automaticamente recebe uma quebra de linha.
+     */
+    for (janela.mensagem_linhas = i = msg_pos = 0; mensagem[i] != '\0'; ++i) {
+        janela.mensagem[janela.mensagem_linhas][msg_pos] = mensagem[i];
+
+        if (msg_pos + 1 >= janela.largura - 4) {
+            janela.mensagem_linhas++;
+            msg_pos = 0;
+        } else {
+            msg_pos++;
+        }
+    }
+
+    strncpy(janela.titulo, titulo, JANELA_TAMANHO_TITULO);
+
+    janela.mensagem_linhas++;
+
+    janela.x = METADE_COLUNAS - janela.largura / 2;
+    janela.y = METADE_LINHAS - janela.altura / 2;
+
+    janela.redesenhar = 1;
+    janela.criada = 1;
+
+    return janela;
+}
+
+struct janela desenha_janela(struct janela janela)
+{
+    int x, y;
+
+    if (!janela.redesenhar)
+        return janela;
+
+    janela.redesenhar = 0;
+
+    for (y = 0; y < janela.altura; ++y) {
+        for (x = 0; x < janela.largura; ++x) {
+            gotoxy(janela.x + x, janela.y + y);
+
+            if ((x > 0 && x < janela.largura - 1)
+                && (y == 0 || y == janela.altura - 1))
+                cprintf("─");
+            else if ((x == 0 || x == janela.largura - 1)
+                && (y > 0 && y < janela.altura - 1))
+                cprintf("│");
+            else if (x == 0 && y == 0)
+                cprintf("┌");
+            else if (x == 0 && y == janela.altura - 1)
+                cprintf("└");
+            else if (x == janela.largura - 1 && y == 0)
+                cprintf("┐");
+            else if (x == janela.largura - 1 && y == janela.altura - 1)
+                cprintf("┘");
+            else if (x > 1 && x < janela.largura - 2
+                && y > 1 && y - 2 < janela.mensagem_linhas
+                && janela.mensagem[y - 2][x - 2] != '\0')
+                cprintf("%c", janela.mensagem[y - 2][x - 2]);
+            else
+                cprintf(" ");
+        }
+    }
+
+    gotoxy(janela.x + 2, janela.y);
+    cprintf(" %s ", janela.titulo);
+
+    return janela;
+}
+
+struct janela processa_eventos_janela(struct janela janela, int tecla)
+{
+    if (!janela.visivel)
+        return janela;
+
+    if (tecla == '\r') {
+        janela.visivel = 0;
+        janela.evento = JANELA_EVENTO_ESCONDIDA;
+    }
+
+    return janela;
+}
+
+struct janela mostra_janela(struct janela janela)
+{
+    janela.visivel = 1;
+    janela.redesenhar = 1;
+    janela.evento = JANELA_EVENTO_EXIBIDA;
+
+    return janela;
+}
+
 int main(void)
 {
     int clear_color1, clear_color2;
@@ -191,7 +335,7 @@ int main(void)
     clock_t temporizador = clock();
 
     srand(time(NULL));
-    setlocale(LC_ALL, "");
+    setlocale(LC_ALL, "C.UTF-8");
     reinicia_jogo();
 
     for (i = 0; i < COLUNAS; ++i)
@@ -247,6 +391,10 @@ int main(void)
     clear_color1 = BLACK;
     clear_color2 = BLACK;
 
+    struct janela menu_janela_sair = nova_janela(20, 10,
+        "Deseja realmente sair?",
+        "Caso saia do jogo todo seu progresso sera perdido!");
+
     while (!sair_do_jogo) {
         if (tela_anterior != tela) {
             tela_anterior = tela;
@@ -300,10 +448,24 @@ int main(void)
             while (kbhit()) getch();
         }
 
+        if (tecla == 'q')
+            break;
+
         if (tela == TELA_MENU) {
             redesenhar += 1;
 
-            if (tecla == '\r') {
+            if (menu_janela_sair.visivel) {
+                menu_janela_sair = processa_eventos_janela(menu_janela_sair, tecla);
+
+                switch (menu_janela_sair.evento) {
+                case JANELA_EVENTO_ESCONDIDA:
+                    redesenhar = 1;
+                    break;
+
+                default:
+                    break;
+                }
+            } else if (tecla == '\r') {
                 switch (menu_opcao_atual) {
                 case 0:
                     clear_color1 = BLACK;
@@ -320,18 +482,20 @@ int main(void)
                     break;
 
                 default:
-                    sair_do_jogo = 1;
+                    menu_janela_sair = mostra_janela(menu_janela_sair);
+                    menu_janela_sair = desenha_janela(menu_janela_sair);
                 }
+            } else if (tecla == 'w') {
+                menu_opcao_atual -= menu_opcao_atual > 0;
+            } else if (tecla == 's') {
+                menu_opcao_atual += menu_opcao_atual < 2;
+            } else {
+                redesenhar -= redesenhar > 0;
             }
 
-            if (tecla == 'w')
-                menu_opcao_atual -= menu_opcao_atual > 0;
-            else if (tecla == 's')
-                menu_opcao_atual += menu_opcao_atual < 2;
-            else
-                redesenhar -= redesenhar > 0;
-
             if (redesenhar) {
+                clrscr();
+
                 textcolor(WHITE);
 
                 i = METADE_COLUNAS - 36;
