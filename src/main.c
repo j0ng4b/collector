@@ -26,10 +26,13 @@
 
 #define JANELA_LARGURA_MAXIMA         (COLUNAS * 80 / 100)
 #define JANELA_ALTURA_MAXIMA          (LINHAS * 80 / 100)
+#define JANELA_NUMERO_BOTOES          3
 #define JANELA_TAMANHO_TITULO         (JANELA_LARGURA_MAXIMA - 10)
 #define JANELA_TAMANHO_MENSAGEM_LINHA (JANELA_LARGURA_MAXIMA - 4)
 #define JANELA_TAMANHO_MENSAGEM       \
     ((JANELA_LARGURA_MAXIMA - 4) * (JANELA_ALTURA_MAXIMA - 4))
+
+#define BOTAO_TAMANHO_TEXTO           10
 
 /*********** Variáveis globais */
 int menu_opcao_atual = 0;
@@ -187,10 +190,20 @@ int novo_recorde(void)
 
 /* TODO: funções para cada tela */
 
-enum janela_evento {
-    JANELA_EVENTO_ESCONDIDA,
-    JANELA_EVENTO_EXIBIDA,
-    JANELA_EVENTO_NENHUM,
+enum tipo_botao {
+    BOTAO_NEGAR,
+    BOTAO_ACEITAR,
+    BOTAO_CANCELAR,
+    BOTAO_NULO,
+};
+
+struct botao {
+    char texto[BOTAO_TAMANHO_TEXTO];
+    int tamanho_texto;
+
+    enum tipo_botao tipo;
+
+    int x, y;
 };
 
 struct janela {
@@ -203,11 +216,15 @@ struct janela {
     char mensagem[JANELA_ALTURA_MAXIMA][JANELA_TAMANHO_MENSAGEM_LINHA];
     int mensagem_linhas;
 
-    enum janela_evento evento;
-
     int redesenhar;
     int visivel;
     int criada;
+
+    enum tipo_botao botao_clicado;
+    struct botao botoes[JANELA_NUMERO_BOTOES];
+    int numero_botoes;
+    int tamanho_texto_botoes;
+    int botao_selecionado;
 };
 
 struct janela nova_janela(int largura, int altura, char titulo[], char mensagem[])
@@ -261,6 +278,33 @@ struct janela nova_janela(int largura, int altura, char titulo[], char mensagem[
     return janela;
 }
 
+struct janela adiciona_botao_janela(struct janela janela, enum tipo_botao tipo,
+    char texto_botao[BOTAO_TAMANHO_TEXTO])
+{
+    int i = 0;
+    int tamanho_texto_botoes;
+    struct botao botao = { 0 };
+
+    botao.tamanho_texto = strlen(texto_botao);
+    if (botao.tamanho_texto >= BOTAO_TAMANHO_TEXTO)
+        return (struct janela) { 0 };
+
+    strncpy(botao.texto, texto_botao, BOTAO_TAMANHO_TEXTO);
+    botao.tipo = tipo;
+    botao.y = janela.altura - 2;
+
+    janela.botoes[janela.numero_botoes] = botao;
+    janela.tamanho_texto_botoes += botao.tamanho_texto + (janela.numero_botoes > 0);
+    janela.numero_botoes++;
+
+    tamanho_texto_botoes = janela.tamanho_texto_botoes;
+    janela.botoes[0].x = janela.largura / 2 - tamanho_texto_botoes / 2;
+    for (i = 1; i < janela.numero_botoes; ++i)
+        janela.botoes[i].x = janela.botoes[i - 1].x + janela.botoes[i - 1].tamanho_texto + 1;
+
+    return janela;
+}
+
 struct janela desenha_janela(struct janela janela)
 {
     int x, y;
@@ -270,6 +314,7 @@ struct janela desenha_janela(struct janela janela)
 
     janela.redesenhar = 0;
 
+    textbackground(BLACK);
     for (y = 0; y < janela.altura; ++y) {
         for (x = 0; x < janela.largura; ++x) {
             gotoxy(janela.x + x, janela.y + y);
@@ -297,6 +342,17 @@ struct janela desenha_janela(struct janela janela)
         }
     }
 
+    for (x = 0; x < janela.numero_botoes; ++x) {
+        if (x == janela.botao_selecionado)
+            textbackground(RED);
+        else
+            textbackground(BLACK);
+
+        gotoxy(janela.x + janela.botoes[x].x, janela.y + janela.botoes[x].y);
+        cprintf("%s", janela.botoes[x].texto);
+    }
+
+    textbackground(BLACK);
     gotoxy(janela.x + 2, janela.y);
     cprintf(" %s ", janela.titulo);
 
@@ -308,9 +364,19 @@ struct janela processa_eventos_janela(struct janela janela, int tecla)
     if (!janela.visivel)
         return janela;
 
-    if (tecla == '\r') {
+    janela.redesenhar = 1;
+    janela.botao_clicado = BOTAO_NULO;
+
+    if (tecla == 'a' && janela.botao_selecionado > 0) {
+        janela.botao_selecionado--;
+    } else if (tecla == 'd' && janela.botao_selecionado + 1 < janela.numero_botoes) {
+        janela.botao_selecionado++;
+    } else if (tecla == '\r') {
         janela.visivel = 0;
-        janela.evento = JANELA_EVENTO_ESCONDIDA;
+        janela.botao_clicado = janela.botoes[janela.botao_selecionado].tipo;
+        janela.botao_selecionado = 0;
+    } else {
+        janela.redesenhar = 0;
     }
 
     return janela;
@@ -320,7 +386,6 @@ struct janela mostra_janela(struct janela janela)
 {
     janela.visivel = 1;
     janela.redesenhar = 1;
-    janela.evento = JANELA_EVENTO_EXIBIDA;
 
     return janela;
 }
@@ -396,6 +461,9 @@ int main(void)
         "Deseja realmente sair?",
         "Caso saia do jogo todo seu progresso sera perdido!");
 
+    menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_ACEITAR, "Sim");
+    menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_NEGAR, "Nao");
+
     while (!sair_do_jogo) {
         if (tela_anterior != tela) {
             tela_anterior = tela;
@@ -450,18 +518,15 @@ int main(void)
             while (kbhit()) getch();
         }
 
-        if (tecla == 'q')
-            break;
-
         if (tela == TELA_MENU) {
             redesenhar += 1;
 
             if (menu_janela_sair.visivel) {
                 menu_janela_sair = processa_eventos_janela(menu_janela_sair, tecla);
 
-                switch (menu_janela_sair.evento) {
-                case JANELA_EVENTO_ESCONDIDA:
-                    redesenhar = 1;
+                switch (menu_janela_sair.botao_clicado) {
+                case BOTAO_ACEITAR:
+                    sair_do_jogo = 1;
                     break;
 
                 default:
@@ -485,7 +550,6 @@ int main(void)
 
                 default:
                     menu_janela_sair = mostra_janela(menu_janela_sair);
-                    menu_janela_sair = desenha_janela(menu_janela_sair);
                 }
             } else if (tecla == 'w') {
                 menu_opcao_atual -= menu_opcao_atual > 0;
@@ -495,7 +559,9 @@ int main(void)
                 redesenhar -= redesenhar > 0;
             }
 
-            if (redesenhar) {
+            if (menu_janela_sair.visivel) {
+                menu_janela_sair = desenha_janela(menu_janela_sair);
+            } else if (redesenhar) {
                 clrscr();
 
                 textcolor(WHITE);
