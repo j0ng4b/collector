@@ -109,6 +109,7 @@ void animacao_gameover(void)
     int i;
     int bolas[COLUNAS + 1] = {0};
 
+    textcolor(WHITE);
     while (bolas[COLUNAS] <= LINHAS) {
         for (i = 1; i <= COLUNAS; ++i) {
             if (bolas[i] > 0) {
@@ -403,6 +404,8 @@ int main(void)
             if (tela == TELA_GAMEOVER) {
                 animacao_gameover();
             } else {
+                textcolor(WHITE);
+
                 for (i = 1; i <= METADE_LINHAS; ++i) {
                     textbackground(WHITE);
 
@@ -414,7 +417,6 @@ int main(void)
 
                     if (i > 1) {
                         textbackground(clear_color1);
-                        textcolor(clear_color1);
 
                         gotoxy(1, i - 1);
                         cprintf("%s", linha_caracteres);
