@@ -190,6 +190,38 @@ int novo_recorde(void)
 
 /* TODO: funções para cada tela */
 
+void desenha_moldura(int transparente, int x, int y, int largura, int altura)
+{
+    int moldura_x, moldura_y;
+
+    for (moldura_y = 0; moldura_y < altura; ++moldura_y) {
+        for (moldura_x = 0; moldura_x < largura; ++moldura_x) {
+            if (moldura_y == 0 || moldura_y == altura - 1) {
+                gotoxy(x + moldura_x, y + moldura_y);
+                cprintf("─");
+            } else if (moldura_x == 0 || moldura_x == largura - 1) {
+                gotoxy(x + moldura_x, y + moldura_y);
+                cprintf("│");
+            } else if (!transparente) {
+                gotoxy(x + moldura_x, y + moldura_y);
+                cprintf(" ");
+            }
+        }
+    }
+
+    gotoxy(x, y);
+    cprintf("┌");
+
+    gotoxy(x + largura - 1, y);
+    cprintf("┐");
+
+    gotoxy(x, y + altura - 1);
+    cprintf("└");
+
+    gotoxy(x + largura - 1, y + altura - 1);
+    cprintf("┘");
+}
+
 enum tipo_botao {
     BOTAO_NEGAR,
     BOTAO_ACEITAR,
@@ -201,9 +233,8 @@ struct botao {
     char texto[BOTAO_TAMANHO_TEXTO];
     int tamanho_texto;
 
-    enum tipo_botao tipo;
-
     int x, y;
+    enum tipo_botao tipo;
 };
 
 struct janela {
@@ -314,31 +345,12 @@ struct janela desenha_janela(struct janela janela)
 
     janela.redesenhar = 0;
 
-    textbackground(BLACK);
-    for (y = 0; y < janela.altura; ++y) {
-        for (x = 0; x < janela.largura; ++x) {
-            gotoxy(janela.x + x, janela.y + y);
+    desenha_moldura(0, janela.x, janela.y, janela.largura, janela.altura);
 
-            if ((x > 0 && x < janela.largura - 1)
-                && (y == 0 || y == janela.altura - 1))
-                cprintf("─");
-            else if ((x == 0 || x == janela.largura - 1)
-                && (y > 0 && y < janela.altura - 1))
-                cprintf("│");
-            else if (x == 0 && y == 0)
-                cprintf("┌");
-            else if (x == 0 && y == janela.altura - 1)
-                cprintf("└");
-            else if (x == janela.largura - 1 && y == 0)
-                cprintf("┐");
-            else if (x == janela.largura - 1 && y == janela.altura - 1)
-                cprintf("┘");
-            else if (x > 1 && x < janela.largura - 2
-                && y > 1 && y - 2 < janela.mensagem_linhas
-                && janela.mensagem[y - 2][x - 2] != '\0')
-                cprintf("%c", janela.mensagem[y - 2][x - 2]);
-            else
-                cprintf(" ");
+    for (y = 0; y < janela.altura; ++y) {
+        if (y > 1 && y - 2 < janela.mensagem_linhas) {
+            gotoxy(janela.x + 2, janela.y + y);
+            cprintf("%-*s", janela.largura - 3, janela.mensagem[y - 2]);
         }
     }
 
