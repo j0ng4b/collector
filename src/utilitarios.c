@@ -50,3 +50,21 @@ void desenha_moldura(int transparente, int x, int y, int largura, int altura)
     cprintf("┘");
 }
 
+void desenha_nome_jogo(int x, int y)
+{
+    gotoxy(x, y++);
+    cprintf("_______ _______ ___     ___     _______ _______ _______ _______ _______");
+    gotoxy(x, y++);
+    cprintf("|   _   |   _   |   |   |   |   |   _   |   _   |       |   _   |   _   \\");
+    gotoxy(x, y++);
+    cprintf("|.  1___|.  |   |.  |   |.  |   |.  1___|.  1___|.|   | |.  |   |.  l   /");
+    gotoxy(x, y++);
+    cprintf("|.  |___|.  |   |.  |___|.  |___|.  __)_|.  |___`-|.  |-|.  |   |.  _   1");
+    gotoxy(x, y++);
+    cprintf("|:  1   |:  1   |:  1   |:  1   |:  1   |:  1   | |:  | |:  1   |:  |   |");
+    gotoxy(x, y++);
+    cprintf("|::.. . |::.. . |::.. . |::.. . |::.. . |::.. . | |::.| |::.. . |::.|:. |");
+    gotoxy(x, y++);
+    cprintf("`-------`-------`-------`-------`-------`-------' `---' `-------`--- ---'");
+}
+

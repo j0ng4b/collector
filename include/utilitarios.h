@@ -1,11 +1,11 @@
 #ifndef COLLECTOR_UTILITARIOS_H
 #define COLLECTOR_UTILITARIOS_H
 
-#define COLUNAS                       80
-#define LINHAS                        24
+#define COLUNAS        80
+#define LINHAS         24
 
-#define METADE_COLUNAS                (COLUNAS / 2)
-#define METADE_LINHAS                 (LINHAS / 2)
+#define METADE_COLUNAS (COLUNAS / 2)
+#define METADE_LINHAS  (LINHAS / 2)
 
 /* msleep
  *
@@ -16,6 +16,10 @@ void msleep(int msec);
 /* desenha_moldura
  */
 void desenha_moldura(int transparente, int x, int y, int largura, int altura);
+
+/* desenha_nome_jogo
+ */
+void desenha_nome_jogo(int x, int y);
 
 #endif /* COLLECTOR_UTILITARIOS_H */
 
