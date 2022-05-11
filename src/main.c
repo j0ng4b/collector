@@ -10,19 +10,11 @@
 /*********** Definições */
 #define LARGURA_COLETOR               10
 
-#define TELA_MENU                     0
-#define TELA_JOGO                     1
-#define TELA_REGRAS                   2
-#define TELA_GAMEOVER                 3
-#define TELA_DIFICULDADES             4
-
 #define NUMERO_RECORDES               3
 #define TAMANHO_NOME_RECORDE          7
 #define RECORDE_MAXIMO_TEXTO_LINHA    43
 
 /*********** Variáveis globais */
-int menu_opcao_atual = 0;
-
 int tela = TELA_MENU;
 int tela_anterior = -1;
 
@@ -157,11 +149,134 @@ int novo_recorde(void)
 
 /* TODO: funções para cada tela */
 
+#define MENU_NUMERO_OPCOES   3
+#define MENU_NUMERO_LEGENDAS 3
+#define MENU_TAMANHO_TEXTOS  30
 
+struct tela_menu {
+    int opcao_selecionada;
+    struct janela janela_sair;
+};
 
+struct tela_menu processa_eventos_tela_menu(struct tela_menu menu, int tecla)
+{
+    if (menu.janela_sair.visivel) {
+        menu.janela_sair = processa_eventos_janela(menu.janela_sair, tecla);
+
+        switch (menu.janela_sair.botao_clicado) {
+        case BOTAO_ACEITAR:
+            //sair_do_jogo = 1;
+            break;
+
+        default:
+            break;
+        }
+    } else if (tecla == '\r') {
+        switch (menu.opcao_selecionada) {
+        case 0:
+            /* clear_color1 = BLACK; */
+            /* clear_color2 = BLACK; */
+
+            tela = TELA_DIFICULDADES;
+            break;
+
+        case 1:
+            /* clear_color1 = BLACK; */
+            /* clear_color2 = BLACK; */
+
+            tela = TELA_REGRAS;
+            break;
+
+        default:
+            menu.janela_sair = mostra_janela(menu.janela_sair);
+        }
+    } else if (tecla == 'w') {
+        menu.opcao_selecionada -= menu.opcao_selecionada > 0;
+    } else if (tecla == 's') {
+        menu.opcao_selecionada += menu.opcao_selecionada < 2;
+    } else {
+        redesenhar -= redesenhar > 0;
+    }
+
+    return menu;
+}
+
+void desenha_tela_menu(struct tela_menu menu)
+{
+    char legendas[MENU_NUMERO_LEGENDAS][MENU_TAMANHO_TEXTOS] = {
+        "enter: confirmar selecao", "s: seta para baixo", "w: seta para cima",
+    };
+
+    char opcoes[MENU_NUMERO_OPCOES][MENU_TAMANHO_TEXTOS] = {
+        "Iniciar", "Regras", "Sair",
+    };
+
+    int i;
+
+    clrscr();
+    textcolor(WHITE);
+    desenha_nome_jogo(METADE_COLUNAS - 36, LINHAS * 0.3);
+
+    for (i = 0; i < MENU_NUMERO_OPCOES; ++i) {
+        if (i == menu.opcao_selecionada)
+            textcolor(RED);
+        else
+            textcolor(WHITE);
+
+        gotoxy(METADE_COLUNAS - strlen(opcoes[i]) / 2, LINHAS * 0.3 + 8 + i);
+        cprintf("%s", opcoes[i]);
+    }
+
+    textcolor(WHITE);
+    for (i = 0; i < MENU_NUMERO_LEGENDAS; ++i) {
+        gotoxy(1, LINHAS - i);
+        cprintf("%s", legendas[i]);
+    }
+}
+
+void desenha_tela_regras(void)
+{
+#define NUMERO_LINHAS_REGRAS 10
+#define TAMANHO_TEXTO_REGRA 54
+
+    char regras[NUMERO_LINHAS_REGRAS][TAMANHO_TEXTO_REGRA] = {
+        "1. Ao iniciar o jogo as teclas responsaveis por mover",
+        "   a barra (coletor) serao a e d.",
+        "",
+        "2. Quando o jogo for iniciado o objetivo sera nao",
+        "   deixar nenhum item cair no chao.",
+        "",
+        "3. Para contabilizar os pontos sera necessario guiar",
+        "   a barra (coletor) ate o item para coleta-lo.",
+        "",
+        "4. A cada certa pontuacao a dificuldade aumenta.",
+    };
+
+    int i;
+    int posicao_y_texto = METADE_LINHAS - 4;
+
+    textcolor(RED);
+
+    gotoxy(METADE_COLUNAS - 3, posicao_y_texto - 2);
+    cprintf("REGRAS");
+
+    textcolor(WHITE);
+    for (i = 0; i < NUMERO_LINHAS_REGRAS; ++i) {
+        gotoxy(METADE_COLUNAS - TAMANHO_TEXTO_REGRA / 2, posicao_y_texto++);
+        cprintf("%s", regras[i]);
+    }
+
+    gotoxy(METADE_COLUNAS - 2, posicao_y_texto + 2);
+    cprintf("<< b");
+
+#undef NUMERO_LINHAS_REGRAS
+#undef TAMANHO_TEXTO_REGRA
+}
 
 int main(void)
 {
+    struct collector colletor;
+
     int clear_color1, clear_color2;
 
     int i, j, k;
@@ -177,52 +292,7 @@ int main(void)
     for (i = 0; i < COLUNAS; ++i)
         linha_caracteres[i] = ' ';
 
-    for (i = 1; i <= LINHAS; ++i) {
-        if (i == 1 || i == LINHAS) {
-            gotoxy(1, i);
-            cprintf("+");
-
-            gotoxy(COLUNAS, i);
-            cprintf("+");
-        } else {
-            gotoxy(1, i);
-            cprintf(":");
-
-            gotoxy(COLUNAS, i);
-            cprintf(":");
-        }
-    }
-
-    i = METADE_COLUNAS - 36;
-    j = METADE_LINHAS  - 3;
-
-    gotoxy(i, j++);
-    cprintf("_______ _______ ___     ___     _______ _______ _______ _______ _______");
-    gotoxy(i, j++);
-    cprintf("|   _   |   _   |   |   |   |   |   _   |   _   |       |   _   |   _   \\");
-    gotoxy(i, j++);
-    cprintf("|.  1___|.  |   |.  |   |.  |   |.  1___|.  1___|.|   | |.  |   |.  l   /");
-    gotoxy(i, j++);
-    cprintf("|.  |___|.  |   |.  |___|.  |___|.  __)_|.  |___`-|.  |-|.  |   |.  _   1");
-    gotoxy(i, j++);
-    cprintf("|:  1   |:  1   |:  1   |:  1   |:  1   |:  1   | |:  | |:  1   |:  |   |");
-    gotoxy(i, j++);
-    cprintf("|::.. . |::.. . |::.. . |::.. . |::.. . |::.. . | |::.| |::.. . |::.|:. |");
-    gotoxy(i, j++);
-    cprintf("`-------`-------`-------`-------`-------`-------' `---' `-------`--- ---'");
-
-    i = 1;
-    do {
-        gotoxy(METADE_COLUNAS - 18, LINHAS * 0.8);
-
-        if ((i = !i))
-            cprintf("Precione qualquer tecla para iniciar!");
-        else
-            cprintf("                                     ");
-
-        gotoxy(METADE_COLUNAS, LINHAS);
-        msleep(500);
-    } while (!kbhit());
+    desenha_tela_inicial();
 
     clear_color1 = BLACK;
     clear_color2 = BLACK;
@@ -233,6 +303,8 @@ int main(void)
 
     menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_ACEITAR, "Sim");
     menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_NEGAR, "Nao");
+
+    collector = novo_collector();
 
     while (!sair_do_jogo) {
         if (tela_anterior != tela) {
@@ -288,106 +360,16 @@ int main(void)
             while (kbhit()) getch();
         }
 
+        if (tecla == 'q')
+            break;
+
         if (tela == TELA_MENU) {
             redesenhar += 1;
 
             if (menu_janela_sair.visivel) {
-                menu_janela_sair = processa_eventos_janela(menu_janela_sair, tecla);
-
-                switch (menu_janela_sair.botao_clicado) {
-                case BOTAO_ACEITAR:
-                    sair_do_jogo = 1;
-                    break;
-
-                default:
-                    break;
-                }
-            } else if (tecla == '\r') {
-                switch (menu_opcao_atual) {
-                case 0:
-                    clear_color1 = BLACK;
-                    clear_color2 = BLACK;
-
-                    tela = TELA_DIFICULDADES;
-                    break;
-
-                case 1:
-                    clear_color1 = BLACK;
-                    clear_color2 = BLACK;
-
-                    tela = TELA_REGRAS;
-                    break;
-
-                default:
-                    menu_janela_sair = mostra_janela(menu_janela_sair);
-                }
-            } else if (tecla == 'w') {
-                menu_opcao_atual -= menu_opcao_atual > 0;
-            } else if (tecla == 's') {
-                menu_opcao_atual += menu_opcao_atual < 2;
-            } else {
-                redesenhar -= redesenhar > 0;
-            }
-
-            if (menu_janela_sair.visivel) {
                 menu_janela_sair = desenha_janela(menu_janela_sair);
             } else if (redesenhar) {
-                clrscr();
-
-                textcolor(WHITE);
-
-                i = METADE_COLUNAS - 36;
-                j = LINHAS * 0.3;
-
-                gotoxy(i, j++);
-                cprintf("_______ _______ ___     ___     _______ _______ _______ _______ _______");
-                gotoxy(i, j++);
-                cprintf("|   _   |   _   |   |   |   |   |   _   |   _   |       |   _   |   _   \\");
-                gotoxy(i, j++);
-                cprintf("|.  1___|.  |   |.  |   |.  |   |.  1___|.  1___|.|   | |.  |   |.  l   /");
-                gotoxy(i, j++);
-                cprintf("|.  |___|.  |   |.  |___|.  |___|.  __)_|.  |___`-|.  |-|.  |   |.  _   1");
-                gotoxy(i, j++);
-                cprintf("|:  1   |:  1   |:  1   |:  1   |:  1   |:  1   | |:  | |:  1   |:  |   |");
-                gotoxy(i, j++);
-                cprintf("|::.. . |::.. . |::.. . |::.. . |::.. . |::.. . | |::.| |::.. . |::.|:. |");
-                gotoxy(i, j++);
-                cprintf("`-------`-------`-------`-------`-------`-------' `---' `-------`--- ---'");
-
-                if (menu_opcao_atual == 0)
-                    textcolor(RED);
-                else
-                    textcolor(WHITE);
-
-                gotoxy(METADE_COLUNAS - 3, ++j);
-                cprintf("Iniciar");
-
-                if (menu_opcao_atual == 1)
-                    textcolor(RED);
-                else
-                    textcolor(WHITE);
-
-                gotoxy(METADE_COLUNAS - 3, ++j);
-                cprintf("Regras");
-
-                if (menu_opcao_atual == 2)
-                    textcolor(RED);
-                else
-                    textcolor(WHITE);
-
-                gotoxy(METADE_COLUNAS - 2, ++j);
-                cprintf("Sair");
-
-                textcolor(WHITE);
-                gotoxy(1, LINHAS - 2);
-                cprintf("w: seta para cima");
-
-                gotoxy(1, LINHAS - 1);
-                cprintf("s: seta para baixo");
-
-                gotoxy(1, LINHAS - 0);
-                cprintf("enter: confirmar selecao");
-
+                desenha_tela_menu();
                 redesenhar = 0;
             }
         } else if (tela == TELA_DIFICULDADES) {
@@ -571,41 +553,7 @@ int main(void)
             }
 
             if (redesenhar) {
-                i = METADE_COLUNAS - 26;
-                j = METADE_LINHAS  - 4;
-
-                textcolor(RED);
-
-                gotoxy(METADE_COLUNAS - 3, j - 2);
-                cprintf("REGRAS");
-
-                textcolor(WHITE);
-
-                gotoxy(i, j++);
-                cprintf("1. Ao iniciar o jogo as teclas responsaveis por mover");
-                gotoxy(i, j++);
-                cprintf("   a barra (coletor) serao a e d.");
-
-                ++j;
-                gotoxy(i, j++);
-                cprintf("2. Quando o jogo for iniciado o objetivo sera nao");
-                gotoxy(i, j++);
-                cprintf("   deixar nenhum item cair no chao.");
-
-                ++j;
-                gotoxy(i, j++);
-                cprintf("3. Para contabilizar os pontos sera necessario guiar");
-                gotoxy(i, j++);
-                cprintf("   a barra (coletor) ate o item para coleta-lo.");
-
-                ++j;
-                gotoxy(i, j++);
-                cprintf("4. A cada certa pontuacao a dificuldade aumenta.");
-                ++j;
-
-                gotoxy(METADE_COLUNAS - 2, j + 2);
-                cprintf("<< b");
-
+                desenha_tela_regras();
                 redesenhar = 0;
             }
         } else if (tela == TELA_GAMEOVER) {
