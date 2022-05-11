@@ -1,6 +1,6 @@
+#include <time.h>
 #include <conio2.h>
-#include "telas.h"
-#include "utilitarios.h"
+#include "collector.h"
 
 struct tela_inicial nova_tela_inicial(void)
 {
@@ -15,14 +15,20 @@ struct tela_inicial nova_tela_inicial(void)
 struct tela_inicial atualiza_tela_inicial(struct tela_inicial tela_inicial,
     int tecla)
 {
-    if (tecla != 0)
-        /* TODO: mudar de tela */;
+    struct pedido_colletor pedido;
+
+    if (tecla != 0) {
+        pedido.tela = TELA_MENU;
+        pedido.pedido = COLLECTOR_MUDAR_TELA;
+    }
 
     if ((clock() - tela_inicial.temporizador) / (double) CLOCKS_PER_SEC > 0.5) {
         tela_inicial.mostra_mensagem = !tela_inicial.mostra_mensagem;
         tela_inicial.temporizador = clock();
+        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
     }
 
+    pedir_collector(pedido);
     return tela_inicial;
 }
 
