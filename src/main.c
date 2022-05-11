@@ -1,20 +1,25 @@
+/*
 #include <ctype.h>
 #include <locale.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include <conio2.h>
+*/
 #include "collector.h"
 
 
 /*********** Definições */
+/*
 #define LARGURA_COLETOR               10
 
 #define NUMERO_RECORDES               3
 #define TAMANHO_NOME_RECORDE          7
 #define RECORDE_MAXIMO_TEXTO_LINHA    43
+*/
 
 /*********** Variáveis globais */
+/*
 int tela = TELA_MENU;
 int tela_anterior = -1;
 
@@ -39,7 +44,7 @@ int dificuldade = 0;
 char linha_caracteres[COLUNAS] = {0};
 int sair_do_jogo = 0;
 int redesenhar = 1;
-
+*/
 
 /*********** Funções */
 
@@ -48,6 +53,7 @@ int redesenhar = 1;
  * Função para reiniciar as variáveis do jogo tanto em caso de game over quanto
  * em caso de ser a primeira execução do jogo
  */
+/*
 void reinicia_jogo(void)
 {
     coletor_pos_x = METADE_COLUNAS - LARGURA_COLETOR / 2;
@@ -61,11 +67,13 @@ void reinicia_jogo(void)
     novo_recorde_index = -1;
     recorde_nome_letra = 0;
 }
+*/
 
 /* animacao_gameover
  *
  * Função para criar uma animação de várias bolinhas caindo.
  */
+/*
 void animacao_gameover(void)
 {
     int i;
@@ -113,6 +121,7 @@ void animacao_gameover(void)
     gotoxy(COLUNAS, bolas[COLUNAS] - 1);
     cprintf(" ");
 }
+*/
 
 /* novo_recorde
  *
@@ -121,16 +130,17 @@ void animacao_gameover(void)
  * recordes e atribuí essa nova pontuação na lista de recordes, do contrário
  * apenas retorna -1.
  */
+/*
 int novo_recorde(void)
 {
     int i, j, k;
 
     for (i = 0; i < NUMERO_RECORDES; ++i) {
         if (recorde_maximos[i] < coletor_pontos) {
-            /* Move todos os recordes uma posição para baixo. Na posição do novo
+            * Move todos os recordes uma posição para baixo. Na posição do novo
              * recorde a nova pontuação é atribuída e o antigo nome é
              * substituído.
-             */
+             *
             for (j = NUMERO_RECORDES - 1; j >= i; --j) {
                 recorde_maximos[j] = j == i ?
                     coletor_pontos : recorde_maximos[j - 1];
@@ -146,8 +156,6 @@ int novo_recorde(void)
 
     return -1;
 }
-
-/* TODO: funções para cada tela */
 
 #define MENU_NUMERO_OPCOES   3
 #define MENU_NUMERO_LEGENDAS 3
@@ -174,15 +182,15 @@ struct tela_menu processa_eventos_tela_menu(struct tela_menu menu, int tecla)
     } else if (tecla == '\r') {
         switch (menu.opcao_selecionada) {
         case 0:
-            /* clear_color1 = BLACK; */
-            /* clear_color2 = BLACK; */
+            clear_color1 = BLACK;
+            clear_color2 = BLACK;
 
             tela = TELA_DIFICULDADES;
             break;
 
         case 1:
-            /* clear_color1 = BLACK; */
-            /* clear_color2 = BLACK; */
+            clear_color1 = BLACK;
+            clear_color2 = BLACK;
 
             tela = TELA_REGRAS;
             break;
@@ -272,15 +280,18 @@ void desenha_tela_regras(void)
 #undef NUMERO_LINHAS_REGRAS
 #undef TAMANHO_TEXTO_REGRA
 }
+*/
 
 int main(void)
 {
-    struct collector colletor;
+    struct collector collector;
 
+    collector = novo_collector();
+    roda_collector(collector);
+
+    /*
     int clear_color1, clear_color2;
 
-    int i, j, k;
-    char tecla = 0;
 
     char temporizador_flag = 0;
     clock_t temporizador = clock();
@@ -303,8 +314,6 @@ int main(void)
 
     menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_ACEITAR, "Sim");
     menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_NEGAR, "Nao");
-
-    collector = novo_collector();
 
     while (!sair_do_jogo) {
         if (tela_anterior != tela) {
@@ -396,7 +405,6 @@ int main(void)
             if (redesenhar) {
                 j = METADE_LINHAS - 4;
 
-                /* TODO: uma tela mais bonitinha com uma descrição do nível */
 
                 textcolor(WHITE);
 
@@ -683,6 +691,7 @@ int main(void)
 
         gotoxy(METADE_COLUNAS, LINHAS);
     }
+    */
 
     return 0;
 }
