@@ -69,13 +69,16 @@ struct janela adiciona_botao_janela(struct janela janela, enum tipo_botao tipo,
     botao.y = janela.altura - 2;
 
     janela.botoes[janela.numero_botoes] = botao;
-    janela.tamanho_texto_botoes += botao.tamanho_texto + (janela.numero_botoes > 0);
+
+    janela.tamanho_texto_botoes += botao.tamanho_texto + 2;
+    janela.tamanho_texto_botoes += janela.numero_botoes > 0;
+
     janela.numero_botoes++;
 
     tamanho_texto_botoes = janela.tamanho_texto_botoes;
     janela.botoes[0].x = janela.largura / 2 - tamanho_texto_botoes / 2;
     for (i = 1; i < janela.numero_botoes; ++i)
-        janela.botoes[i].x = janela.botoes[i - 1].x + janela.botoes[i - 1].tamanho_texto + 1;
+        janela.botoes[i].x = janela.botoes[i - 1].x + janela.botoes[i - 1].tamanho_texto + 2;
 
     return janela;
 }
@@ -105,7 +108,7 @@ struct janela desenha_janela(struct janela janela)
             textbackground(BLACK);
 
         gotoxy(janela.x + janela.botoes[x].x, janela.y + janela.botoes[x].y);
-        cprintf("%s", janela.botoes[x].texto);
+        cprintf(" %s ", janela.botoes[x].texto);
     }
 
     textbackground(BLACK);
