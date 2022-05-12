@@ -115,24 +115,23 @@ struct janela desenha_janela(struct janela janela)
     return janela;
 }
 
-struct janela processa_eventos_janela(struct janela janela, int tecla)
+struct janela  atualiza_janela(struct janela janela, int tecla)
 {
     if (!janela.visivel)
         return janela;
 
-    janela.redesenhar = 1;
     janela.botao_clicado = BOTAO_NULO;
 
     if (tecla == 'a' && janela.botao_selecionado > 0) {
         janela.botao_selecionado--;
+        janela.redesenhar = 1;
     } else if (tecla == 'd' && janela.botao_selecionado + 1 < janela.numero_botoes) {
         janela.botao_selecionado++;
+        janela.redesenhar = 1;
     } else if (tecla == '\r') {
         janela.visivel = 0;
         janela.botao_clicado = janela.botoes[janela.botao_selecionado].tipo;
         janela.botao_selecionado = 0;
-    } else {
-        janela.redesenhar = 0;
     }
 
     return janela;

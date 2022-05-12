@@ -2,8 +2,8 @@
 #define COLLECTOR_H
 
 #include "utilitarios.h"
-#include "telas.h"
 #include "janela.h"
+#include "telas.h"
 
 enum tipo_pedidos_collector {
     COLLECTOR_NENHUM_PEDIDO,
@@ -19,6 +19,7 @@ struct collector {
     int sair_do_jogo;
 
     struct tela_inicial tela_inicial;
+    struct tela_menu tela_menu;
 };
 
 struct pedido_colletor {
@@ -26,9 +27,16 @@ struct pedido_colletor {
     enum tipo_pedidos_collector pedido;
 };
 
+/* novo_collector
+ */
 struct collector novo_collector(void);
+
+/* roda_collector
+ */
 void roda_collector(struct collector collector);
 
+/* pedir_collector
+ */
 void pedir_collector(struct pedido_colletor pedido);
 
 #endif /* COLLECTOR_H */

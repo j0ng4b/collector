@@ -20,9 +20,6 @@
 
 /*********** Variáveis globais */
 /*
-int tela = TELA_MENU;
-int tela_anterior = -1;
-
 int coletor_pos_x;
 int coletor_pos_y;
 int coletor_pontos;
@@ -42,8 +39,6 @@ char recorde_nomes[NUMERO_RECORDES][TAMANHO_NOME_RECORDE] = {
 int dificuldade = 0;
 
 char linha_caracteres[COLUNAS] = {0};
-int sair_do_jogo = 0;
-int redesenhar = 1;
 */
 
 /*********** Funções */
@@ -157,91 +152,6 @@ int novo_recorde(void)
     return -1;
 }
 
-#define MENU_NUMERO_OPCOES   3
-#define MENU_NUMERO_LEGENDAS 3
-#define MENU_TAMANHO_TEXTOS  30
-
-struct tela_menu {
-    int opcao_selecionada;
-    struct janela janela_sair;
-};
-
-struct tela_menu processa_eventos_tela_menu(struct tela_menu menu, int tecla)
-{
-    if (menu.janela_sair.visivel) {
-        menu.janela_sair = processa_eventos_janela(menu.janela_sair, tecla);
-
-        switch (menu.janela_sair.botao_clicado) {
-        case BOTAO_ACEITAR:
-            //sair_do_jogo = 1;
-            break;
-
-        default:
-            break;
-        }
-    } else if (tecla == '\r') {
-        switch (menu.opcao_selecionada) {
-        case 0:
-            clear_color1 = BLACK;
-            clear_color2 = BLACK;
-
-            tela = TELA_DIFICULDADES;
-            break;
-
-        case 1:
-            clear_color1 = BLACK;
-            clear_color2 = BLACK;
-
-            tela = TELA_REGRAS;
-            break;
-
-        default:
-            menu.janela_sair = mostra_janela(menu.janela_sair);
-        }
-    } else if (tecla == 'w') {
-        menu.opcao_selecionada -= menu.opcao_selecionada > 0;
-    } else if (tecla == 's') {
-        menu.opcao_selecionada += menu.opcao_selecionada < 2;
-    } else {
-        redesenhar -= redesenhar > 0;
-    }
-
-    return menu;
-}
-
-void desenha_tela_menu(struct tela_menu menu)
-{
-    char legendas[MENU_NUMERO_LEGENDAS][MENU_TAMANHO_TEXTOS] = {
-        "enter: confirmar selecao", "s: seta para baixo", "w: seta para cima",
-    };
-
-    char opcoes[MENU_NUMERO_OPCOES][MENU_TAMANHO_TEXTOS] = {
-        "Iniciar", "Regras", "Sair",
-    };
-
-    int i;
-
-    clrscr();
-    textcolor(WHITE);
-    desenha_nome_jogo(METADE_COLUNAS - 36, LINHAS * 0.3);
-
-    for (i = 0; i < MENU_NUMERO_OPCOES; ++i) {
-        if (i == menu.opcao_selecionada)
-            textcolor(RED);
-        else
-            textcolor(WHITE);
-
-        gotoxy(METADE_COLUNAS - strlen(opcoes[i]) / 2, LINHAS * 0.3 + 8 + i);
-        cprintf("%s", opcoes[i]);
-    }
-
-    textcolor(WHITE);
-    for (i = 0; i < MENU_NUMERO_LEGENDAS; ++i) {
-        gotoxy(1, LINHAS - i);
-        cprintf("%s", legendas[i]);
-    }
-}
-
 void desenha_tela_regras(void)
 {
 #define NUMERO_LINHAS_REGRAS 10
@@ -290,32 +200,6 @@ int main(void)
     roda_collector(collector);
 
     /*
-    int clear_color1, clear_color2;
-
-
-    char temporizador_flag = 0;
-    clock_t temporizador = clock();
-
-    srand(time(NULL));
-    setlocale(LC_ALL, "C.UTF-8");
-    reinicia_jogo();
-
-    for (i = 0; i < COLUNAS; ++i)
-        linha_caracteres[i] = ' ';
-
-    desenha_tela_inicial();
-
-    clear_color1 = BLACK;
-    clear_color2 = BLACK;
-
-    struct janela menu_janela_sair = nova_janela(20, 10,
-        "Deseja realmente sair?",
-        "Caso saia do jogo todo seu progresso sera perdido!");
-
-    menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_ACEITAR, "Sim");
-    menu_janela_sair = adiciona_botao_janela(menu_janela_sair, BOTAO_NEGAR, "Nao");
-
-    while (!sair_do_jogo) {
         if (tela_anterior != tela) {
             tela_anterior = tela;
             redesenhar = 1;
@@ -369,18 +253,6 @@ int main(void)
             while (kbhit()) getch();
         }
 
-        if (tecla == 'q')
-            break;
-
-        if (tela == TELA_MENU) {
-            redesenhar += 1;
-
-            if (menu_janela_sair.visivel) {
-                menu_janela_sair = desenha_janela(menu_janela_sair);
-            } else if (redesenhar) {
-                desenha_tela_menu();
-                redesenhar = 0;
-            }
         } else if (tela == TELA_DIFICULDADES) {
             redesenhar += 1;
 
@@ -684,12 +556,6 @@ int main(void)
             }
         }
 
-        if (kbhit())
-            tecla = getch();
-        else
-            tecla = 0;
-
-        gotoxy(METADE_COLUNAS, LINHAS);
     }
     */
 

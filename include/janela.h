@@ -62,9 +62,9 @@ struct janela adiciona_botao_janela(struct janela janela, enum tipo_botao tipo,
  */
 struct janela desenha_janela(struct janela janela);
 
-/* processa_eventos_janela
+/* atualiza_janela
  */
-struct janela processa_eventos_janela(struct janela janela, int tecla);
+struct janela atualiza_janela(struct janela janela, int tecla);
 
 /* mostra_janela
  */

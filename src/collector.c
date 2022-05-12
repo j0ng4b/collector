@@ -17,6 +17,7 @@ struct collector novo_collector(void)
     collector.sair_do_jogo = 0;
 
     collector.tela_inicial = nova_tela_inicial();
+    collector.tela_menu = nova_tela_menu();
 
     return collector;
 }
@@ -27,6 +28,8 @@ void roda_collector(struct collector collector)
         collector = processa_pedidos(collector);
         collector = atualiza_telas(collector);
         collector = desenha_telas(collector);
+
+        gotoxy(METADE_COLUNAS, LINHAS);
     }
 }
 
@@ -52,6 +55,7 @@ static struct collector atualiza_telas(struct collector collector)
         break;
 
     case TELA_MENU:
+        collector.tela_menu = atualiza_tela_menu(collector.tela_menu, tecla);
         break;
 
     default:
@@ -72,6 +76,7 @@ static struct collector desenha_telas(struct collector collector)
         break;
 
     case TELA_MENU:
+        collector.tela_menu = desenha_tela_menu(collector.tela_menu);
         break;
 
     default:
@@ -87,7 +92,6 @@ static struct collector processa_pedidos(struct collector collector)
     switch (pedido_pendente.pedido) {
     case COLLECTOR_MUDAR_TELA:
         collector.tela = pedido_pendente.tela;
-        break;
 
     case COLLECTOR_REDESENHAR_TELA:
         collector.redesenha = 1;

@@ -2,6 +2,7 @@
 #define COLLECTOR_TELAS_H
 
 #include <time.h>
+#include "collector.h"
 
 enum telas {
     TELA_INICIAL,
@@ -11,6 +12,7 @@ enum telas {
     TELA_GAMEOVER,
     TELA_DIFICULDADES,
 };
+
 
 struct tela_inicial {
     int mostra_mensagem;
@@ -22,8 +24,16 @@ struct tela_inicial atualiza_tela_inicial(struct tela_inicial tela_inicial,
     int tecla);
 struct tela_inicial desenha_tela_inicial(struct tela_inicial tela_inicial);
 
-void atualiza_tela_menu(void);
-void desenha_tela_menu(void);
+
+struct tela_menu {
+    int opcao_selecionada;
+    struct janela janela_sair;
+};
+
+struct tela_menu nova_tela_menu(void);
+struct tela_menu atualiza_tela_menu(struct tela_menu tela_menu, int tecla);
+struct tela_menu desenha_tela_menu(struct tela_menu tela_menu);
+
 
 void atualiza_tela_jogo(void);
 void desenha_tela_jogo(void);
