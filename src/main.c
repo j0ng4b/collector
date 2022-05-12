@@ -152,44 +152,6 @@ int novo_recorde(void)
     return -1;
 }
 
-void desenha_tela_regras(void)
-{
-#define NUMERO_LINHAS_REGRAS 10
-#define TAMANHO_TEXTO_REGRA 54
-
-    char regras[NUMERO_LINHAS_REGRAS][TAMANHO_TEXTO_REGRA] = {
-        "1. Ao iniciar o jogo as teclas responsaveis por mover",
-        "   a barra (coletor) serao a e d.",
-        "",
-        "2. Quando o jogo for iniciado o objetivo sera nao",
-        "   deixar nenhum item cair no chao.",
-        "",
-        "3. Para contabilizar os pontos sera necessario guiar",
-        "   a barra (coletor) ate o item para coleta-lo.",
-        "",
-        "4. A cada certa pontuacao a dificuldade aumenta.",
-    };
-
-    int i;
-    int posicao_y_texto = METADE_LINHAS - 4;
-
-    textcolor(RED);
-
-    gotoxy(METADE_COLUNAS - 3, posicao_y_texto - 2);
-    cprintf("REGRAS");
-
-    textcolor(WHITE);
-    for (i = 0; i < NUMERO_LINHAS_REGRAS; ++i) {
-        gotoxy(METADE_COLUNAS - TAMANHO_TEXTO_REGRA / 2, posicao_y_texto++);
-        cprintf("%s", regras[i]);
-    }
-
-    gotoxy(METADE_COLUNAS - 2, posicao_y_texto + 2);
-    cprintf("<< b");
-
-#undef NUMERO_LINHAS_REGRAS
-#undef TAMANHO_TEXTO_REGRA
-}
 */
 
 int main(void)
@@ -422,18 +384,6 @@ int main(void)
                     cprintf(" ");
                 }
 
-                redesenhar = 0;
-            }
-        } else if (tela == TELA_REGRAS) {
-            if (tecla == 'b') {
-                tela = TELA_MENU;
-
-                clear_color1 = BLACK;
-                clear_color2 = BLACK;
-            }
-
-            if (redesenhar) {
-                desenha_tela_regras();
                 redesenhar = 0;
             }
         } else if (tela == TELA_GAMEOVER) {

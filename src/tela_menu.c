@@ -18,6 +18,21 @@ struct tela_menu nova_tela_menu(void)
     tela_menu.janela_sair = adiciona_botao_janela(tela_menu.janela_sair,
         BOTAO_NEGAR, "Nao");
 
+    tela_menu.janela_informacoes = nova_janela(57, 15, "Informacoes",
+        "1. Ao iniciar o jogo as teclas responsaveis por mover"
+        "   a barra (coletor) serao a e d.                    "
+        "                                                     "
+        "2. Quando o jogo for iniciado o objetivo sera nao    "
+        "   deixar nenhum item cair no chao.                  "
+        "                                                     "
+        "3. Para contabilizar os pontos sera necessario guiar "
+        "   a barra (coletor) ate o item para coleta-lo.      "
+        "                                                     "
+        "4. A cada certa pontuacao a dificuldade aumenta.     ");
+
+    tela_menu.janela_informacoes = adiciona_botao_janela(tela_menu.janela_informacoes,
+        BOTAO_ACEITAR, "OK");
+
     return tela_menu;
 }
 
@@ -40,6 +55,12 @@ struct tela_menu atualiza_tela_menu(struct tela_menu tela_menu, int tecla)
         default:
             break;
         }
+    } else if (tela_menu.janela_informacoes.visivel) {
+        tela_menu.janela_informacoes = atualiza_janela(tela_menu.janela_informacoes, tecla);
+
+        if (tela_menu.janela_sair.botao_clicado != BOTAO_NULO)
+            pedido.pedido = COLLECTOR_REDESENHAR_TELA;
+
     } else if (tecla == '\r') {
         pedido.pedido = COLLECTOR_MUDAR_TELA;
 
@@ -49,7 +70,8 @@ struct tela_menu atualiza_tela_menu(struct tela_menu tela_menu, int tecla)
             break;
 
         case 1:
-            pedido.tela = TELA_REGRAS;
+            tela_menu.janela_informacoes = mostra_janela(tela_menu.janela_informacoes);
+            pedido.pedido = COLLECTOR_REDESENHAR_TELA;
             break;
 
         case 2:
@@ -76,13 +98,16 @@ struct tela_menu desenha_tela_menu(struct tela_menu tela_menu)
     };
 
     char opcoes[TELA_MENU_NUMERO_OPCOES][TELA_MENU_TAMANHO_TEXTOS] = {
-        "Iniciar", "Regras", "Sair",
+        "Iniciar", "Informacoes", "Sair",
     };
 
     int i;
 
     if (tela_menu.janela_sair.visivel) {
         tela_menu.janela_sair = desenha_janela(tela_menu.janela_sair);
+        return tela_menu;
+    } else if (tela_menu.janela_informacoes.visivel) {
+        tela_menu.janela_informacoes = desenha_janela(tela_menu.janela_informacoes);
         return tela_menu;
     }
 
