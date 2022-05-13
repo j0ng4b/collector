@@ -112,20 +112,20 @@ struct tela_menu desenha_tela_menu(struct tela_menu tela_menu)
     }
 
     clrscr();
-    textcolor(WHITE);
+    textbackground(BLACK);
     desenha_nome_jogo(METADE_COLUNAS - 36, LINHAS * 0.3);
 
     for (i = 0; i < TELA_MENU_NUMERO_OPCOES; ++i) {
         if (i == tela_menu.opcao_selecionada)
-            textcolor(RED);
+            textbackground(RED);
         else
-            textcolor(WHITE);
+            textbackground(BLACK);
 
         gotoxy(METADE_COLUNAS - strlen(opcoes[i]) / 2, LINHAS * 0.3 + 8 + i);
-        cprintf("%s", opcoes[i]);
+        cprintf(" %s ", opcoes[i]);
     }
 
-    textcolor(WHITE);
+    textbackground(BLACK);
     for (i = 0; i < TELA_MENU_NUMERO_LEGENDAS; ++i) {
         gotoxy(1, LINHAS - i);
         cprintf("%s", legendas[i]);
