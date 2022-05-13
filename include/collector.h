@@ -20,6 +20,7 @@ struct collector {
 
     struct tela_inicial tela_inicial;
     struct tela_menu tela_menu;
+    struct tela_jogo tela_jogo;
 };
 
 struct pedido_colletor {

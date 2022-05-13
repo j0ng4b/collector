@@ -18,6 +18,7 @@ struct collector novo_collector(void)
 
     collector.tela_inicial = nova_tela_inicial();
     collector.tela_menu = nova_tela_menu();
+    collector.tela_jogo = nova_tela_jogo();
 
     return collector;
 }
@@ -58,6 +59,10 @@ static struct collector atualiza_telas(struct collector collector)
         collector.tela_menu = atualiza_tela_menu(collector.tela_menu, tecla);
         break;
 
+    case TELA_JOGO:
+        collector.tela_jogo = atualiza_tela_jogo(collector.tela_jogo, tecla);
+        break;
+
     default:
         break;
     }
@@ -77,6 +82,10 @@ static struct collector desenha_telas(struct collector collector)
 
     case TELA_MENU:
         collector.tela_menu = desenha_tela_menu(collector.tela_menu);
+        break;
+
+    case TELA_JOGO:
+        collector.tela_jogo = desenha_tela_jogo(collector.tela_jogo);
         break;
 
     default:

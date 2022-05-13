@@ -11,7 +11,6 @@
 
 /*********** Definições */
 /*
-#define LARGURA_COLETOR               10
 
 #define NUMERO_RECORDES               3
 #define TAMANHO_NOME_RECORDE          7
@@ -20,15 +19,6 @@
 
 /*********** Variáveis globais */
 /*
-int coletor_pos_x;
-int coletor_pos_y;
-int coletor_pontos;
-int vell_coletor;
-
-int bola_pos_x;
-int bola_pos_y;
-float bola_velocidade;
-
 int recorde_nome_letra = 0;
 int novo_recorde_index = -1;
 int recorde_maximos[NUMERO_RECORDES] = {0};
@@ -42,27 +32,6 @@ char linha_caracteres[COLUNAS] = {0};
 */
 
 /*********** Funções */
-
-/* reinicia_jogo
- *
- * Função para reiniciar as variáveis do jogo tanto em caso de game over quanto
- * em caso de ser a primeira execução do jogo
- */
-/*
-void reinicia_jogo(void)
-{
-    coletor_pos_x = METADE_COLUNAS - LARGURA_COLETOR / 2;
-    coletor_pos_y = LINHAS * 0.8;
-    coletor_pontos = 0;
-
-    bola_pos_x = 1 + rand() % COLUNAS;
-    bola_pos_y = 1;
-    bola_velocidade = 0.3;
-
-    novo_recorde_index = -1;
-    recorde_nome_letra = 0;
-}
-*/
 
 /* animacao_gameover
  *
@@ -302,26 +271,6 @@ int main(void)
                 redesenhar = 0;
             }
         } else if (tela == TELA_JOGO) {
-            redesenhar += 1;
-
-            if (tecla == 'b') {
-                tela = TELA_MENU;
-
-                clear_color1 = BLACK;
-                clear_color2 = BLACK;
-            } else if (tecla == 'd') {
-                coletor_pos_x += coletor_pos_x + LARGURA_COLETOR <= COLUNAS;
-            } else if (tecla == 'a') {
-                 coletor_pos_x -= coletor_pos_x > 1;
-            } else {
-                redesenhar -= redesenhar > 0;
-            }
-
-            if ((clock() - temporizador) / (double) CLOCKS_PER_SEC > bola_velocidade) {
-                ++bola_pos_y;
-                redesenhar = 1;
-                temporizador = clock();
-            }
 
             if (coletor_pontos == 0) {
                 bola_velocidade = 0.3 / (dificuldade + 1);
@@ -335,57 +284,6 @@ int main(void)
                 bola_velocidade = 0.003 / (dificuldade + 1);
             }
 
-            if (bola_pos_y == coletor_pos_y) {
-                if (bola_pos_x >= coletor_pos_x
-                        && bola_pos_x < coletor_pos_x + LARGURA_COLETOR) {
-                    textbackground(BLUE);
-                    gotoxy(bola_pos_x, bola_pos_y - 1);
-                    cprintf(" ");
-
-                    bola_pos_x = 1 + rand() % COLUNAS;
-                    bola_pos_y = 4;
-                    ++coletor_pontos;
-                } else {
-                    tela = TELA_GAMEOVER;
-
-                    clear_color1 = BLACK;
-                    clear_color2 = BLACK;
-                }
-            }
-
-            if (redesenhar) {
-                textcolor(BLACK);
-                textbackground(BLUE);
-                gotoxy(1, 1);
-                cprintf("Pontos: %d", coletor_pontos);
-
-                textbackground(YELLOW);
-                gotoxy(bola_pos_x, bola_pos_y);
-                cprintf(" ");
-
-                textbackground(BLUE);
-                gotoxy(bola_pos_x, bola_pos_y - 1);
-                cprintf(" ");
-
-                textbackground(BLUE);
-                if (coletor_pos_x > 1) {
-                    gotoxy(coletor_pos_x - 1, coletor_pos_y);
-                    cprintf(" ");
-                }
-
-                if (coletor_pos_x + LARGURA_COLETOR <= COLUNAS) {
-                    gotoxy(coletor_pos_x + LARGURA_COLETOR, coletor_pos_y);
-                    cprintf(" ");
-                }
-
-                textbackground(WHITE);
-                for (i = 0; i < LARGURA_COLETOR; ++i) {
-                    gotoxy(coletor_pos_x + i, coletor_pos_y);
-                    cprintf(" ");
-                }
-
-                redesenhar = 0;
-            }
         } else if (tela == TELA_GAMEOVER) {
             if (novo_recorde_index > -1
                 && recorde_nome_letra < TAMANHO_NOME_RECORDE - 1) {
