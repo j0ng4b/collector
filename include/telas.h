@@ -39,6 +39,12 @@ void atualiza_tela_dificuldades(int tecla);
 void desenha_tela_dificuldades(void);
 
 
+enum tela_jogo_dificuldades {
+    TELA_JOGO_DIFICULDADE_FACIL,
+    TELA_JOGO_DIFICULDADE_MEDIA,
+    TELA_JOGO_DIFICULDADE_DIFICIL,
+};
+
 struct tela_jogo {
     struct {
         int posicao_x;
@@ -54,22 +60,16 @@ struct tela_jogo {
         float velocidade_y;
     } bola;
 
+    enum tela_jogo_dificuldades dificuldade;
     clock_t temporizador;
-};
-
-enum tela_jogo_dificuldades {
-    TELA_JOGO_DIFICULDADE_FACIL,
-    TELA_JOGO_DIFICULDADE_MEDIA,
-    TELA_JOGO_DIFICULDADE_DIFICIL,
 };
 
 
 struct tela_jogo nova_tela_jogo(void);
 struct tela_jogo atualiza_tela_jogo(struct tela_jogo tela_jogo, int tecla);
 struct tela_jogo desenha_tela_jogo(struct tela_jogo tela_jogo);
+void tela_jogo_muda_dificuldade(void);
 
-enum tela_jogo_dificuldades pega_dificuldade_tela_jogo(void);
-void muda_dificuldade_tela_jogo(enum tela_jogo_dificuldades nova_dificuldade);
 
 void atualiza_tela_gameover(void);
 void desenha_tela_gameover(void);

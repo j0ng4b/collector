@@ -10,6 +10,7 @@
 static struct tela_jogo reinicia_jogo(struct tela_jogo tela_jogo);
 
 enum tela_jogo_dificuldades dificuldade = TELA_JOGO_DIFICULDADE_FACIL;
+static int deve_mudar_dificuldade = 0;
 
 struct tela_jogo nova_tela_jogo(void)
 {
@@ -37,6 +38,11 @@ struct tela_jogo atualiza_tela_jogo(struct tela_jogo tela_jogo, int tecla)
         pedido.pedido = COLLECTOR_REDESENHAR_TELA;
     }
 
+    if (deve_mudar_dificuldade) {
+        tela_jogo.dificuldade = dificuldade;
+        deve_mudar_dificuldade = 0;
+    }
+
     if ((clock() - tela_jogo.temporizador) / (double) CLOCKS_PER_SEC >
         tela_jogo.bola.velocidade_y) {
         tela_jogo.temporizador = clock();
@@ -46,23 +52,23 @@ struct tela_jogo atualiza_tela_jogo(struct tela_jogo tela_jogo, int tecla)
 
     switch (tela_jogo.coletor.pontos) {
     case 0:
-        tela_jogo.bola.velocidade_y = 0.3 / (dificuldade + 1);
+        tela_jogo.bola.velocidade_y = 0.3 / (tela_jogo.dificuldade + 1);
         break;
 
     case 5:
-        tela_jogo.bola.velocidade_y = 0.2 / (dificuldade + 1);
+        tela_jogo.bola.velocidade_y = 0.2 / (tela_jogo.dificuldade + 1);
         break;
 
     case 10:
-        tela_jogo.bola.velocidade_y = 0.1 / (dificuldade + 1);
+        tela_jogo.bola.velocidade_y = 0.1 / (tela_jogo.dificuldade + 1);
         break;
 
     case 30:
-        tela_jogo.bola.velocidade_y = 0.005 / (dificuldade + 1);
+        tela_jogo.bola.velocidade_y = 0.005 / (tela_jogo.dificuldade + 1);
         break;
 
     case 40:
-        tela_jogo.bola.velocidade_y = 0.003 / (dificuldade + 1);
+        tela_jogo.bola.velocidade_y = 0.003 / (tela_jogo.dificuldade + 1);
         break;
     }
 
@@ -116,6 +122,11 @@ struct tela_jogo desenha_tela_jogo(struct tela_jogo tela_jogo)
     }
 
     return tela_jogo;
+}
+
+void tela_jogo_muda_dificuldade(void)
+{
+    deve_mudar_dificuldade = 1;
 }
 
 /* reinicia_jogo

@@ -21,6 +21,7 @@ void atualiza_tela_dificuldades(int tecla)
         pedido.tela = TELA_MENU;
         pedido.pedido = COLLECTOR_MUDAR_TELA;
     } else if (tecla == '\r') {
+        tela_jogo_muda_dificuldade();
         pedido.tela = TELA_JOGO;
         pedido.pedido = COLLECTOR_MUDAR_TELA;
     }
