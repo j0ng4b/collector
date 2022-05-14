@@ -15,7 +15,7 @@ struct tela_inicial nova_tela_inicial(void)
 struct tela_inicial atualiza_tela_inicial(struct tela_inicial tela_inicial,
     int tecla)
 {
-    struct pedido_colletor pedido;
+    struct pedido_collector pedido;
 
     if (tecla != 0) {
         pedido.tela = TELA_MENU;

@@ -1,7 +1,7 @@
 #include <conio2.h>
 #include "collector.h"
 
-static struct pedido_colletor pedido_pendente;
+static struct pedido_collector pedido_pendente;
 
 static struct collector atualiza_telas(struct collector collector);
 static struct collector desenha_telas(struct collector collector);
@@ -34,7 +34,7 @@ void roda_collector(struct collector collector)
     }
 }
 
-void pedir_collector(struct pedido_colletor pedido)
+void pedir_collector(struct pedido_collector pedido)
 {
     pedido_pendente = pedido;
 }

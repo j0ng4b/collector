@@ -39,7 +39,7 @@ struct tela_menu nova_tela_menu(void)
 struct tela_menu atualiza_tela_menu(struct tela_menu tela_menu, int tecla)
 {
     int janela_botao_selecionado = tela_menu.janela_sair.botao_selecionado;
-    struct pedido_colletor pedido = { 0 };
+    struct pedido_collector pedido = { 0 };
 
     if (tela_menu.janela_sair.visivel) {
         tela_menu.janela_sair = atualiza_janela(tela_menu.janela_sair, tecla);

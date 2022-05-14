@@ -24,7 +24,7 @@ struct tela_jogo nova_tela_jogo(void)
 
 struct tela_jogo atualiza_tela_jogo(struct tela_jogo tela_jogo, int tecla)
 {
-    struct pedido_colletor pedido = { 0 };
+    struct pedido_collector pedido = { 0 };
 
     if (tecla == 'b') {
         pedido.tela = TELA_MENU;

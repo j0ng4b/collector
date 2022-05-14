@@ -9,7 +9,7 @@ extern enum tela_jogo_dificuldades dificuldade;
 
 void atualiza_tela_dificuldades(int tecla)
 {
-    struct pedido_colletor pedido = { 0 };
+    struct pedido_collector pedido = { 0 };
 
     if (tecla == 'a') {
         dificuldade -= dificuldade > 0;

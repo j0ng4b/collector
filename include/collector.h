@@ -23,7 +23,7 @@ struct collector {
     struct tela_jogo tela_jogo;
 };
 
-struct pedido_colletor {
+struct pedido_collector {
     enum telas tela;
     enum tipo_pedidos_collector pedido;
 };
@@ -38,7 +38,7 @@ void roda_collector(struct collector collector);
 
 /* pedir_collector
  */
-void pedir_collector(struct pedido_colletor pedido);
+void pedir_collector(struct pedido_collector pedido);
 
 #endif /* COLLECTOR_H */
 
