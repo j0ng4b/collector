@@ -35,6 +35,10 @@ struct tela_menu atualiza_tela_menu(struct tela_menu tela_menu, int tecla);
 struct tela_menu desenha_tela_menu(struct tela_menu tela_menu);
 
 
+void atualiza_tela_dificuldades(int tecla);
+void desenha_tela_dificuldades(void);
+
+
 struct tela_jogo {
     struct {
         int posicao_x;
@@ -53,15 +57,22 @@ struct tela_jogo {
     clock_t temporizador;
 };
 
+enum tela_jogo_dificuldades {
+    TELA_JOGO_DIFICULDADE_FACIL,
+    TELA_JOGO_DIFICULDADE_MEDIA,
+    TELA_JOGO_DIFICULDADE_DIFICIL,
+};
+
+
 struct tela_jogo nova_tela_jogo(void);
 struct tela_jogo atualiza_tela_jogo(struct tela_jogo tela_jogo, int tecla);
 struct tela_jogo desenha_tela_jogo(struct tela_jogo tela_jogo);
 
+enum tela_jogo_dificuldades pega_dificuldade_tela_jogo(void);
+void muda_dificuldade_tela_jogo(enum tela_jogo_dificuldades nova_dificuldade);
+
 void atualiza_tela_gameover(void);
 void desenha_tela_gameover(void);
-
-void atualiza_tela_dificuldades(void);
-void desenha_tela_dificuldades(void);
 
 #endif /* COLLECTOR_TELAS_H */
 

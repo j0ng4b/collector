@@ -118,7 +118,7 @@ struct janela desenha_janela(struct janela janela)
     return janela;
 }
 
-struct janela  atualiza_janela(struct janela janela, int tecla)
+struct janela atualiza_janela(struct janela janela, int tecla)
 {
     if (!janela.visivel)
         return janela;
