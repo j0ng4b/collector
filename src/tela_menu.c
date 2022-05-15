@@ -51,7 +51,7 @@ struct tela_menu tela_menu_atualiza(struct tela_menu tela)
 
         switch (tela.janela.sair.botao_clicado) {
         case JANELA_BOTAO_ACEITAR:
-            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+            contexto.alteracao = COLLECTOR_CONTEXTO_SAIR_DO_JOGO;
             break;
 
         default:
@@ -115,6 +115,7 @@ struct tela_menu tela_menu_desenha(struct tela_menu tela)
     }
 
     textbackground(BLACK);
+    clrscr();
     desenha_nome_jogo(METADE_COLUNAS - 36, LINHAS * 0.3);
 
     for (i = 0; i < TELA_MENU_NUMERO_OPCOES; ++i) {
