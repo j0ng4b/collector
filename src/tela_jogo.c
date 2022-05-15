@@ -2,96 +2,95 @@
 #include <string.h>
 #include <time.h>
 #include <conio2.h>
+#include "telas.h"
 #include "collector.h"
 
-#define TELA_JOGO_LARGURA_COLETOR      10
-#define TELA_JOGO_POSICAO_INICIAL_BOLA 2
+#define LARGURA_COLETOR      10
+#define POSICAO_INICIAL_BOLA 2
 
-static struct tela_jogo reinicia_jogo(struct tela_jogo tela_jogo);
+static struct tela_jogo reinicia_jogo(struct tela_jogo tela);
 
-enum tela_jogo_dificuldades dificuldade = TELA_JOGO_DIFICULDADE_FACIL;
-static int deve_mudar_dificuldade = 0;
-
-struct tela_jogo nova_tela_jogo(void)
+struct tela_jogo tela_jogo_nova(void)
 {
-    struct tela_jogo tela_jogo = { 0 };
+    struct tela_jogo tela = { 0 };
 
     srand(time(NULL));
-    tela_jogo = reinicia_jogo(tela_jogo);
+    tela = reinicia_jogo(tela);
 
-    return tela_jogo;
+    return tela;
 }
 
-struct tela_jogo atualiza_tela_jogo(struct tela_jogo tela_jogo, int tecla)
+struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela)
 {
-    struct pedido_collector pedido = { 0 };
+    struct contexto contexto = collector_contexto();
 
-    if (tecla == 'b') {
-        pedido.tela = TELA_MENU;
-        pedido.pedido = COLLECTOR_MUDAR_TELA;
-    } else if (tecla == 'd' &&
-        tela_jogo.coletor.posicao_x + TELA_JOGO_LARGURA_COLETOR <= COLUNAS) {
-        tela_jogo.coletor.posicao_x++;
-        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
-    } else if (tecla == 'a' && tela_jogo.coletor.posicao_x > 1) {
-        tela_jogo.coletor.posicao_x--;
-        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
+    if (contexto.tecla == 'b') {
+        contexto.tela = TELA_NIVEIS;
+        contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA;
+    } else if (contexto.tecla == 'd' &&
+        tela.coletor.posicao_x + LARGURA_COLETOR <= COLUNAS) {
+        tela.coletor.posicao_x++;
+
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+    } else if (contexto.tecla == 'a' && tela.coletor.posicao_x > 1) {
+        tela.coletor.posicao_x--;
+
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
     }
 
-    if (deve_mudar_dificuldade) {
-        tela_jogo.dificuldade = dificuldade;
-        deve_mudar_dificuldade = 0;
+    if ((clock() - tela.temporizador) / (double) CLOCKS_PER_SEC >
+        tela.bola.velocidade_y) {
+        tela.temporizador = clock();
+        tela.bola.posicao_y++;
+
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
     }
 
-    if ((clock() - tela_jogo.temporizador) / (double) CLOCKS_PER_SEC >
-        tela_jogo.bola.velocidade_y) {
-        tela_jogo.temporizador = clock();
-        tela_jogo.bola.posicao_y++;
-        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
-    }
-
-    switch (tela_jogo.coletor.pontos) {
+    switch (tela.coletor.pontos) {
     case 0:
-        tela_jogo.bola.velocidade_y = 0.3 / (tela_jogo.dificuldade + 1);
+        tela.bola.velocidade_y = 0.3 / (contexto.nivel_dificuldade + 1);
         break;
 
     case 5:
-        tela_jogo.bola.velocidade_y = 0.2 / (tela_jogo.dificuldade + 1);
+        tela.bola.velocidade_y = 0.2 / (contexto.nivel_dificuldade + 1);
         break;
 
     case 10:
-        tela_jogo.bola.velocidade_y = 0.1 / (tela_jogo.dificuldade + 1);
+        tela.bola.velocidade_y = 0.1 / (contexto.nivel_dificuldade + 1);
         break;
 
     case 30:
-        tela_jogo.bola.velocidade_y = 0.005 / (tela_jogo.dificuldade + 1);
+        tela.bola.velocidade_y = 0.005 / (contexto.nivel_dificuldade + 1);
         break;
 
     case 40:
-        tela_jogo.bola.velocidade_y = 0.003 / (tela_jogo.dificuldade + 1);
+        tela.bola.velocidade_y = 0.003 / (contexto.nivel_dificuldade + 1);
         break;
     }
 
-    if (tela_jogo.bola.posicao_y == tela_jogo.coletor.posicao_y) {
-        if (tela_jogo.bola.posicao_x >= tela_jogo.coletor.posicao_x
-            && tela_jogo.bola.posicao_x < tela_jogo.coletor.posicao_x
-                + TELA_JOGO_LARGURA_COLETOR) {
-            tela_jogo.bola.posicao_x = 1 + rand() % COLUNAS;
-            tela_jogo.bola.posicao_y = TELA_JOGO_POSICAO_INICIAL_BOLA;
+    if (tela.bola.posicao_y == tela.coletor.posicao_y) {
+        if (tela.bola.posicao_x >= tela.coletor.posicao_x
+            && tela.bola.posicao_x < tela.coletor.posicao_x
+                + LARGURA_COLETOR) {
+            tela.bola.posicao_x = 1 + rand() % COLUNAS;
+            tela.bola.posicao_y = POSICAO_INICIAL_BOLA;
 
-            tela_jogo.coletor.pontos++;
+            tela.coletor.pontos++;
         } else {
-            tela_jogo = reinicia_jogo(tela_jogo);
-            pedido.tela = TELA_GAMEOVER;
-            pedido.pedido = COLLECTOR_MUDAR_TELA;
+            contexto.pontos = tela.coletor.pontos;
+            tela = reinicia_jogo(tela);
+
+            contexto.tela = TELA_GAMEOVER;
+            contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA |
+                COLLECTOR_CONTEXTO_ALTERAR_PONTOS;
         }
     }
 
-    pedir_collector(pedido);
-    return tela_jogo;
+    collector_altera_contexto(contexto);
+    return tela;
 }
 
-struct tela_jogo desenha_tela_jogo(struct tela_jogo tela_jogo)
+struct tela_jogo tela_jogo_desenha(struct tela_jogo tela)
 {
     char linha_vazia[COLUNAS + 1];
     int i;
@@ -103,30 +102,25 @@ struct tela_jogo desenha_tela_jogo(struct tela_jogo tela_jogo)
     textbackground(BLUE);
 
     gotoxy(1, 1);
-    cprintf("Pontos: %d", tela_jogo.coletor.pontos);
+    cprintf("Pontos: %d", tela.coletor.pontos);
 
     for (i = 0; i < 2; ++i) {
         textbackground(BLUE);
-        gotoxy(1, tela_jogo.coletor.posicao_y - (1 - i));
+        gotoxy(1, tela.coletor.posicao_y - (1 - i));
         cprintf("%s", linha_vazia);
 
         textbackground(i == 0 ? YELLOW : BLUE);
-        gotoxy(tela_jogo.bola.posicao_x, tela_jogo.bola.posicao_y - i);
+        gotoxy(tela.bola.posicao_x, tela.bola.posicao_y - i);
         cprintf(" ");
     }
 
     textbackground(WHITE);
-    for (i = 0; i < TELA_JOGO_LARGURA_COLETOR; ++i) {
-        gotoxy(tela_jogo.coletor.posicao_x + i, tela_jogo.coletor.posicao_y);
+    for (i = 0; i < LARGURA_COLETOR; ++i) {
+        gotoxy(tela.coletor.posicao_x + i, tela.coletor.posicao_y);
         cprintf(" ");
     }
 
-    return tela_jogo;
-}
-
-void tela_jogo_muda_dificuldade(void)
-{
-    deve_mudar_dificuldade = 1;
+    return tela;
 }
 
 /* reinicia_jogo
@@ -134,16 +128,16 @@ void tela_jogo_muda_dificuldade(void)
  * Função para reiniciar as variáveis do jogo tanto em caso de game over quanto
  * em caso de ser a primeira execução do jogo
  */
-struct tela_jogo reinicia_jogo(struct tela_jogo tela_jogo)
+struct tela_jogo reinicia_jogo(struct tela_jogo tela)
 {
-    tela_jogo.coletor.posicao_x = METADE_COLUNAS - TELA_JOGO_LARGURA_COLETOR / 2;
-    tela_jogo.coletor.posicao_y = LINHAS * 0.8;
-    tela_jogo.coletor.pontos = 0;
+    tela.coletor.posicao_x = METADE_COLUNAS - LARGURA_COLETOR / 2;
+    tela.coletor.posicao_y = LINHAS * 0.8;
+    tela.coletor.pontos = 0;
 
-    tela_jogo.bola.posicao_x = 1 + rand() % COLUNAS;
-    tela_jogo.bola.posicao_y = TELA_JOGO_POSICAO_INICIAL_BOLA;
-    tela_jogo.bola.velocidade_y = 0.3;
+    tela.bola.posicao_x = 1 + rand() % COLUNAS;
+    tela.bola.posicao_y = POSICAO_INICIAL_BOLA;
+    tela.bola.velocidade_y = 0.3;
 
-    return tela_jogo;
+    return tela;
 }
 

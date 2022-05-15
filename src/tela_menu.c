@@ -1,24 +1,26 @@
 #include <conio2.h>
+#include "telas.h"
 #include "collector.h"
 
 #define TELA_MENU_NUMERO_OPCOES   3
 #define TELA_MENU_NUMERO_LEGENDAS 3
 #define TELA_MENU_TAMANHO_TEXTOS  30
 
-struct tela_menu nova_tela_menu(void)
+struct tela_menu tela_menu_nova(void)
 {
     struct tela_menu tela_menu;
 
     tela_menu.opcao_selecionada = 0;
-    tela_menu.janela_sair = nova_janela(20, 10, "Deseja realmente sair?",
+
+    tela_menu.janela.sair = janela_nova(20, 10, "Deseja realmente sair?",
         "Caso saia do jogo todo seu progresso sera perdido!");
 
-    tela_menu.janela_sair = adiciona_botao_janela(tela_menu.janela_sair,
-        BOTAO_ACEITAR, "Sim");
-    tela_menu.janela_sair = adiciona_botao_janela(tela_menu.janela_sair,
-        BOTAO_NEGAR, "Nao");
+    tela_menu.janela.sair = janela_adiciona_botao(tela_menu.janela.sair,
+        JANELA_BOTAO_ACEITAR, "Sim");
+    tela_menu.janela.sair = janela_adiciona_botao(tela_menu.janela.sair,
+        JANELA_BOTAO_NEGAR, "Nao");
 
-    tela_menu.janela_informacoes = nova_janela(57, 15, "Informacoes",
+    tela_menu.janela.informacoes = janela_nova(57, 15, "Informacoes",
         "1. Ao iniciar o jogo as teclas responsaveis por mover"
         "   a barra (coletor) serao a e d.                    "
         "                                                     "
@@ -30,68 +32,69 @@ struct tela_menu nova_tela_menu(void)
         "                                                     "
         "4. A cada certa pontuacao a dificuldade aumenta.     ");
 
-    tela_menu.janela_informacoes = adiciona_botao_janela(tela_menu.janela_informacoes,
-        BOTAO_ACEITAR, "OK");
+    tela_menu.janela.informacoes = janela_adiciona_botao(tela_menu.janela.informacoes,
+        JANELA_BOTAO_ACEITAR, "OK");
 
     return tela_menu;
 }
 
-struct tela_menu atualiza_tela_menu(struct tela_menu tela_menu, int tecla)
+struct tela_menu tela_menu_atualiza(struct tela_menu tela)
 {
-    int janela_botao_selecionado = tela_menu.janela_sair.botao_selecionado;
-    struct pedido_collector pedido = { 0 };
+    int janela_botao_selecionado = tela.janela.sair.botao_selecionado;
+    struct contexto contexto = collector_contexto();
 
-    if (tela_menu.janela_sair.visivel) {
-        tela_menu.janela_sair = atualiza_janela(tela_menu.janela_sair, tecla);
+    if (tela.janela.sair.visivel) {
+        tela.janela.sair = janela_atualiza(tela.janela.sair, contexto.tecla);
 
-        if (janela_botao_selecionado != tela_menu.janela_sair.botao_selecionado)
-            pedido.pedido = COLLECTOR_REDESENHAR_TELA;
+        if (janela_botao_selecionado != tela.janela.sair.botao_selecionado)
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
-        switch (tela_menu.janela_sair.botao_clicado) {
-        case BOTAO_ACEITAR:
-            pedido.pedido = COLLECTOR_SAIR_DO_JOGO;
+        switch (tela.janela.sair.botao_clicado) {
+        case JANELA_BOTAO_ACEITAR:
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
 
         default:
             break;
         }
-    } else if (tela_menu.janela_informacoes.visivel) {
-        tela_menu.janela_informacoes = atualiza_janela(tela_menu.janela_informacoes, tecla);
+    } else if (tela.janela.informacoes.visivel) {
+        tela.janela.informacoes = janela_atualiza(tela.janela.informacoes,
+            contexto.tecla);
 
-        if (tela_menu.janela_sair.botao_clicado != BOTAO_NULO)
-            pedido.pedido = COLLECTOR_REDESENHAR_TELA;
+        if (tela.janela.sair.botao_clicado != JANELA_BOTAO_NULO)
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
-    } else if (tecla == '\r') {
-        pedido.pedido = COLLECTOR_MUDAR_TELA;
+    } else if (contexto.tecla == '\r') {
+        contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA;
 
-        switch (tela_menu.opcao_selecionada) {
+        switch (tela.opcao_selecionada) {
         case 0:
-            pedido.tela = TELA_DIFICULDADES;
+            contexto.tela = TELA_NIVEIS;
             break;
 
         case 1:
-            tela_menu.janela_informacoes = mostra_janela(tela_menu.janela_informacoes);
-            pedido.pedido = COLLECTOR_REDESENHAR_TELA;
+            tela.janela.informacoes = janela_mostrar(tela.janela.informacoes);
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
 
         case 2:
-            tela_menu.janela_sair = mostra_janela(tela_menu.janela_sair);
-            pedido.pedido = COLLECTOR_REDESENHAR_TELA;
+            tela.janela.sair = janela_mostrar(tela.janela.sair);
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
         }
-    } else if (tecla == 'w' && tela_menu.opcao_selecionada > 0) {
-        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
-        tela_menu.opcao_selecionada--;
-    } else if (tecla == 's' && tela_menu.opcao_selecionada < 2) {
-        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
-        tela_menu.opcao_selecionada++;
+    } else if (contexto.tecla == 'w' && tela.opcao_selecionada > 0) {
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+        tela.opcao_selecionada--;
+    } else if (contexto.tecla == 's' && tela.opcao_selecionada < 2) {
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+        tela.opcao_selecionada++;
     }
 
-    pedir_collector(pedido);
-    return tela_menu;
+    collector_altera_contexto(contexto);
+    return tela;
 }
 
-struct tela_menu desenha_tela_menu(struct tela_menu tela_menu)
+struct tela_menu tela_menu_desenha(struct tela_menu tela)
 {
     char legendas[TELA_MENU_NUMERO_LEGENDAS][TELA_MENU_TAMANHO_TEXTOS] = {
         "enter: confirmar selecao", "s: seta para baixo", "w: seta para cima",
@@ -103,20 +106,19 @@ struct tela_menu desenha_tela_menu(struct tela_menu tela_menu)
 
     int i;
 
-    if (tela_menu.janela_sair.visivel) {
-        tela_menu.janela_sair = desenha_janela(tela_menu.janela_sair);
-        return tela_menu;
-    } else if (tela_menu.janela_informacoes.visivel) {
-        tela_menu.janela_informacoes = desenha_janela(tela_menu.janela_informacoes);
-        return tela_menu;
+    if (tela.janela.sair.visivel) {
+        tela.janela.sair = janela_desenha(tela.janela.sair);
+        return tela;
+    } else if (tela.janela.informacoes.visivel) {
+        tela.janela.informacoes = janela_desenha(tela.janela.informacoes);
+        return tela;
     }
 
-    clrscr();
     textbackground(BLACK);
     desenha_nome_jogo(METADE_COLUNAS - 36, LINHAS * 0.3);
 
     for (i = 0; i < TELA_MENU_NUMERO_OPCOES; ++i) {
-        if (i == tela_menu.opcao_selecionada)
+        if (i == tela.opcao_selecionada)
             textbackground(RED);
         else
             textbackground(BLACK);
@@ -131,6 +133,6 @@ struct tela_menu desenha_tela_menu(struct tela_menu tela_menu)
         cprintf("%s", legendas[i]);
     }
 
-    return tela_menu;
+    return tela;
 }
 

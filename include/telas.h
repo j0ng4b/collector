@@ -2,49 +2,54 @@
 #define COLLECTOR_TELAS_H
 
 #include <time.h>
-#include "collector.h"
+#include "janela.h"
 
 enum telas {
     TELA_INICIAL,
     TELA_MENU,
+    TELA_NIVEIS,
     TELA_JOGO,
     TELA_GAMEOVER,
-    TELA_DIFICULDADES,
 };
 
 
+/** Tela inicial */
 struct tela_inicial {
     int mostra_mensagem;
     clock_t temporizador;
 };
 
-struct tela_inicial nova_tela_inicial(void);
-struct tela_inicial atualiza_tela_inicial(struct tela_inicial tela_inicial,
-    int tecla);
-struct tela_inicial desenha_tela_inicial(struct tela_inicial tela_inicial);
+struct tela_inicial tela_inicial_nova(void);
+struct tela_inicial tela_inicial_atualiza(struct tela_inicial tela);
+struct tela_inicial tela_inicial_desenha(struct tela_inicial tela);
 
 
+/** Tela menu */
 struct tela_menu {
+    struct {
+        struct janela sair;
+        struct janela informacoes;
+    } janela;
+
     int opcao_selecionada;
-    struct janela janela_sair;
-    struct janela janela_informacoes;
 };
 
-struct tela_menu nova_tela_menu(void);
-struct tela_menu atualiza_tela_menu(struct tela_menu tela_menu, int tecla);
-struct tela_menu desenha_tela_menu(struct tela_menu tela_menu);
+struct tela_menu tela_menu_nova(void);
+struct tela_menu tela_menu_atualiza(struct tela_menu tela);
+struct tela_menu tela_menu_desenha(struct tela_menu tela);
 
 
-void atualiza_tela_dificuldades(int tecla);
-void desenha_tela_dificuldades(void);
-
-
-enum tela_jogo_dificuldades {
-    TELA_JOGO_DIFICULDADE_FACIL,
-    TELA_JOGO_DIFICULDADE_MEDIA,
-    TELA_JOGO_DIFICULDADE_DIFICIL,
+/** Tela níveis */
+struct tela_niveis {
+    int nivel_selecionado;
 };
 
+struct tela_niveis tela_niveis_nova(void);
+struct tela_niveis tela_niveis_atualiza(struct tela_niveis tela);
+struct tela_niveis tela_niveis_desenha(struct tela_niveis tela);
+
+
+/** Tela jogo */
 struct tela_jogo {
     struct {
         int posicao_x;
@@ -60,19 +65,31 @@ struct tela_jogo {
         float velocidade_y;
     } bola;
 
-    enum tela_jogo_dificuldades dificuldade;
     clock_t temporizador;
 };
 
-
-struct tela_jogo nova_tela_jogo(void);
-struct tela_jogo atualiza_tela_jogo(struct tela_jogo tela_jogo, int tecla);
-struct tela_jogo desenha_tela_jogo(struct tela_jogo tela_jogo);
-void tela_jogo_muda_dificuldade(void);
+struct tela_jogo tela_jogo_nova(void);
+struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela);
+struct tela_jogo tela_jogo_desenha(struct tela_jogo tela);
 
 
-void atualiza_tela_gameover(void);
-void desenha_tela_gameover(void);
+/** Tela Gameover */
+struct tela_gameover {
+    int novo_recorde;
+    int lendo_novo_recorde;
+
+    struct {
+        int posicao;
+        int mostrar;
+    } cursor;
+
+    clock_t temporizador;
+};
+
+struct tela_gameover tela_gameover_nova(void);
+struct tela_gameover tela_gameover_atualiza(struct tela_gameover tela);
+struct tela_gameover tela_gameover_desenha(struct tela_gameover tela);
+
 
 #endif /* COLLECTOR_TELAS_H */
 

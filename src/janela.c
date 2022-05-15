@@ -2,7 +2,7 @@
 #include <conio2.h>
 #include "janela.h"
 
-struct janela nova_janela(int largura, int altura, char titulo[], char mensagem[])
+struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[])
 {
     int i, msg_pos;
     struct janela janela = { 0 };
@@ -53,18 +53,18 @@ struct janela nova_janela(int largura, int altura, char titulo[], char mensagem[
     return janela;
 }
 
-struct janela adiciona_botao_janela(struct janela janela, enum tipo_botao tipo,
-    char texto_botao[BOTAO_TAMANHO_TEXTO])
+struct janela janela_adiciona_botao(struct janela janela,
+    enum janela_tipo_botao tipo, char texto_botao[JANELA_TAMANHO_TEXTO_BOTAO])
 {
     int i = 0;
     int tamanho_texto_botoes;
-    struct botao botao = { 0 };
+    struct janela_botao botao = { 0 };
 
     botao.tamanho_texto = strlen(texto_botao);
-    if (botao.tamanho_texto >= BOTAO_TAMANHO_TEXTO)
+    if (botao.tamanho_texto >= JANELA_TAMANHO_TEXTO_BOTAO)
         return (struct janela) { 0 };
 
-    strncpy(botao.texto, texto_botao, BOTAO_TAMANHO_TEXTO);
+    strncpy(botao.texto, texto_botao, JANELA_TAMANHO_TEXTO_BOTAO);
     botao.tipo = tipo;
     botao.y = janela.altura - 2;
 
@@ -83,7 +83,29 @@ struct janela adiciona_botao_janela(struct janela janela, enum tipo_botao tipo,
     return janela;
 }
 
-struct janela desenha_janela(struct janela janela)
+struct janela janela_atualiza(struct janela janela, int tecla)
+{
+    if (!janela.visivel)
+        return janela;
+
+    janela.botao_clicado = JANELA_BOTAO_NULO;
+
+    if (tecla == 'a' && janela.botao_selecionado > 0) {
+        janela.botao_selecionado--;
+        janela.redesenhar = 1;
+    } else if (tecla == 'd' && janela.botao_selecionado + 1 < janela.numero_botoes) {
+        janela.botao_selecionado++;
+        janela.redesenhar = 1;
+    } else if (tecla == '\r') {
+        janela.visivel = 0;
+        janela.botao_clicado = janela.botoes[janela.botao_selecionado].tipo;
+        janela.botao_selecionado = 0;
+    }
+
+    return janela;
+}
+
+struct janela janela_desenha(struct janela janela)
 {
     int x, y;
 
@@ -118,29 +140,7 @@ struct janela desenha_janela(struct janela janela)
     return janela;
 }
 
-struct janela atualiza_janela(struct janela janela, int tecla)
-{
-    if (!janela.visivel)
-        return janela;
-
-    janela.botao_clicado = BOTAO_NULO;
-
-    if (tecla == 'a' && janela.botao_selecionado > 0) {
-        janela.botao_selecionado--;
-        janela.redesenhar = 1;
-    } else if (tecla == 'd' && janela.botao_selecionado + 1 < janela.numero_botoes) {
-        janela.botao_selecionado++;
-        janela.redesenhar = 1;
-    } else if (tecla == '\r') {
-        janela.visivel = 0;
-        janela.botao_clicado = janela.botoes[janela.botao_selecionado].tipo;
-        janela.botao_selecionado = 0;
-    }
-
-    return janela;
-}
-
-struct janela mostra_janela(struct janela janela)
+struct janela janela_mostrar(struct janela janela)
 {
     janela.visivel = 1;
     janela.redesenhar = 1;

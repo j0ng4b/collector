@@ -21,5 +21,9 @@ void desenha_moldura(int transparente, int x, int y, int largura, int altura);
  */
 void desenha_nome_jogo(int x, int y);
 
+/* desenha_linha_recorde
+ */
+void desenha_linha_recorde(int x, int y, char *nome, int pontos, int posicao);
+
 #endif /* COLLECTOR_UTILITARIOS_H */
 

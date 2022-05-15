@@ -1,7 +1,7 @@
-#include "utilitarios.h"
-
 #include <time.h>
 #include <conio2.h>
+#include "utilitarios.h"
+#include "collector.h"
 
 void msleep(int msec)
 {
@@ -26,10 +26,10 @@ void desenha_moldura(int transparente, int x, int y, int largura, int altura)
         for (moldura_x = 0; moldura_x < largura; ++moldura_x) {
             if (moldura_y == 0 || moldura_y == altura - 1) {
                 gotoxy(x + moldura_x, y + moldura_y);
-                cprintf("─");
+                cprintf("-");
             } else if (moldura_x == 0 || moldura_x == largura - 1) {
                 gotoxy(x + moldura_x, y + moldura_y);
-                cprintf("│");
+                cprintf("|");
             } else if (!transparente) {
                 gotoxy(x + moldura_x, y + moldura_y);
                 cprintf(" ");
@@ -38,16 +38,16 @@ void desenha_moldura(int transparente, int x, int y, int largura, int altura)
     }
 
     gotoxy(x, y);
-    cprintf("┌");
+    cprintf("+");
 
     gotoxy(x + largura - 1, y);
-    cprintf("┐");
+    cprintf("+");
 
     gotoxy(x, y + altura - 1);
-    cprintf("└");
+    cprintf("+");
 
     gotoxy(x + largura - 1, y + altura - 1);
-    cprintf("┘");
+    cprintf("+");
 }
 
 void desenha_nome_jogo(int x, int y)
@@ -66,5 +66,22 @@ void desenha_nome_jogo(int x, int y)
     cprintf("|::.. . |::.. . |::.. . |::.. . |::.. . |::.. . | |::.| |::.. . |::.|:. |");
     gotoxy(x, y++);
     cprintf("`-------`-------`-------`-------`-------`-------' `---' `-------`--- ---'");
+}
+
+void desenha_linha_recorde(int x, int y, char nome[], int pontos, int posicao)
+{
+    char linha_potilhada[RECORDE_MAXIMO_TEXTO_LINHA] = { 0 };
+
+    memset(linha_potilhada, '.', sizeof(linha_potilhada) - 1);
+
+    gotoxy(x, y);
+    cprintf("%s", linha_potilhada);
+
+    gotoxy(x, y);
+    cprintf("%d. ", posicao);
+    cprintf("%s ", nome);
+
+    gotoxy(x + RECORDE_MAXIMO_TEXTO_LINHA - 9, y);
+    cprintf(" %4d pts", pontos);
 }
 

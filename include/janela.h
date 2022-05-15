@@ -3,29 +3,31 @@
 
 #include "utilitarios.h"
 
+#define JANELA_NUMERO_BOTOES          3
+
 #define JANELA_LARGURA_MAXIMA         (COLUNAS * 80 / 100)
 #define JANELA_ALTURA_MAXIMA          (LINHAS * 80 / 100)
-#define JANELA_NUMERO_BOTOES          3
+
 #define JANELA_TAMANHO_TITULO         (JANELA_LARGURA_MAXIMA - 10)
 #define JANELA_TAMANHO_MENSAGEM_LINHA (JANELA_LARGURA_MAXIMA - 4)
 #define JANELA_TAMANHO_MENSAGEM       \
     ((JANELA_LARGURA_MAXIMA - 4) * (JANELA_ALTURA_MAXIMA - 4))
 
-#define BOTAO_TAMANHO_TEXTO           10
+#define JANELA_TAMANHO_TEXTO_BOTAO    10
 
-enum tipo_botao {
-    BOTAO_NEGAR,
-    BOTAO_ACEITAR,
-    BOTAO_CANCELAR,
-    BOTAO_NULO,
+enum janela_tipo_botao {
+    JANELA_BOTAO_NEGAR,
+    JANELA_BOTAO_ACEITAR,
+    JANELA_BOTAO_CANCELAR,
+    JANELA_BOTAO_NULO,
 };
 
-struct botao {
-    char texto[BOTAO_TAMANHO_TEXTO];
+struct janela_botao {
+    char texto[JANELA_TAMANHO_TEXTO_BOTAO];
     int tamanho_texto;
 
     int x, y;
-    enum tipo_botao tipo;
+    enum janela_tipo_botao tipo;
 };
 
 struct janela {
@@ -42,33 +44,23 @@ struct janela {
     int visivel;
     int criada;
 
-    enum tipo_botao botao_clicado;
-    struct botao botoes[JANELA_NUMERO_BOTOES];
+    enum janela_tipo_botao botao_clicado;
+    struct janela_botao botoes[JANELA_NUMERO_BOTOES];
     int numero_botoes;
     int tamanho_texto_botoes;
     int botao_selecionado;
 };
 
-/* nova_janela
- */
-struct janela nova_janela(int largura, int altura, char titulo[], char mensagem[]);
+struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[]);
 
-/* adiciona_botao_janela
- */
-struct janela adiciona_botao_janela(struct janela janela, enum tipo_botao tipo,
-    char texto_botao[BOTAO_TAMANHO_TEXTO]);
+struct janela janela_adiciona_botao(struct janela janela,
+    enum janela_tipo_botao tipo, char texto_botao[JANELA_TAMANHO_TEXTO_BOTAO]);
 
-/* desenha_janela
- */
-struct janela desenha_janela(struct janela janela);
+struct janela janela_atualiza(struct janela janela, int tecla);
 
-/* atualiza_janela
- */
-struct janela atualiza_janela(struct janela janela, int tecla);
+struct janela janela_desenha(struct janela janela);
 
-/* mostra_janela
- */
-struct janela mostra_janela(struct janela janela);
+struct janela janela_mostrar(struct janela janela);
 
 #endif /* COLLECTOR_JANELA_H */
 

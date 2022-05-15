@@ -1,35 +1,45 @@
 #include <conio2.h>
+#include "telas.h"
 #include "collector.h"
 
 #define TAMANHO_MAXIMO_TEXTOS     50
 #define NUMERO_NIVEIS_DIFICULDADE 3
 #define NUMERO_LEGENDAS           3
 
-extern enum tela_jogo_dificuldades dificuldade;
-
-void atualiza_tela_dificuldades(int tecla)
+struct tela_niveis tela_niveis_nova(void)
 {
-    struct pedido_collector pedido = { 0 };
+    struct tela_niveis tela = { 0 };
 
-    if (tecla == 'a') {
-        dificuldade -= dificuldade > 0;
-        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
-    } else if (tecla == 'd') {
-        dificuldade += dificuldade < 2;
-        pedido.pedido = COLLECTOR_REDESENHAR_TELA;
-    } else if (tecla == 'b') {
-        pedido.tela = TELA_MENU;
-        pedido.pedido = COLLECTOR_MUDAR_TELA;
-    } else if (tecla == '\r') {
-        tela_jogo_muda_dificuldade();
-        pedido.tela = TELA_JOGO;
-        pedido.pedido = COLLECTOR_MUDAR_TELA;
-    }
-
-    pedir_collector(pedido);
+    tela.nivel_selecionado = 0;
+    return tela;
 }
 
-void desenha_tela_dificuldades(void)
+struct tela_niveis tela_niveis_atualiza(struct tela_niveis tela)
+{
+    struct contexto contexto = collector_contexto();
+
+    if (contexto.tecla == 'a' && tela.nivel_selecionado > 0) {
+        tela.nivel_selecionado--;
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+    } else if (contexto.tecla == 'd'
+        && tela.nivel_selecionado < NUMERO_NIVEIS_DIFICULDADE - 1) {
+        tela.nivel_selecionado++;
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+    } else if (contexto.tecla == 'b') {
+        contexto.tela = TELA_MENU;
+        contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA;
+    } else if (contexto.tecla == '\r') {
+        contexto.tela = TELA_JOGO;
+        contexto.nivel_dificuldade = tela.nivel_selecionado;
+        contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA |
+            COLLECTOR_CONTEXTO_ALTERAR_NIVEL;
+    }
+
+    collector_altera_contexto(contexto);
+    return tela;
+}
+
+struct tela_niveis tela_niveis_desenha(struct tela_niveis tela)
 {
     char texto_dificuldades[NUMERO_NIVEIS_DIFICULDADE][TAMANHO_MAXIMO_TEXTOS] = {
         "Facil", "Medio", "Dificil",
@@ -51,7 +61,7 @@ void desenha_tela_dificuldades(void)
     cprintf("Nivel inicial");
 
     for (i = 0; i < NUMERO_NIVEIS_DIFICULDADE; ++i) {
-        if ((int) dificuldade == i)
+        if (tela.nivel_selecionado == i)
             textcolor(RED);
         else
             textcolor(WHITE);
@@ -94,5 +104,7 @@ void desenha_tela_dificuldades(void)
         gotoxy(1, LINHAS - i);
         cprintf("%s", texto_legendas[i]);
     }
+
+    return tela;
 }
 
