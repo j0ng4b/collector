@@ -1,6 +1,7 @@
 #include <string.h>
 #include <conio2.h>
 #include "collector.h"
+#include "utilitarios.h"
 
 static struct contexto contexto_alterado;
 
@@ -8,6 +9,9 @@ static struct collector atualiza_telas(struct collector collector);
 static struct collector desenha_telas(struct collector collector);
 static struct collector atualiza_contexto(struct collector collector);
 static struct collector verifica_novo_recorde(struct collector);
+
+static void animacao_comum(void);
+static void animacao_gameover(void);
 
 struct collector collector_novo(void)
 {
@@ -30,6 +34,8 @@ struct collector collector_novo(void)
 
     collector.contexto.alteracao = COLLECTOR_CONTEXTO_SEM_ALTERACAO;
 
+    collector.animacao_pendente = 0;
+
     collector.tela.inicial = tela_inicial_nova();
     collector.tela.menu = tela_menu_nova();
     collector.tela.niveis = tela_niveis_nova();
@@ -42,6 +48,15 @@ struct collector collector_novo(void)
 void collector_rodar(struct collector collector)
 {
     while (!collector.contexto.sair_do_jogo) {
+        if (collector.animacao_pendente) {
+            if (collector.animacao_pendente == 1)
+                animacao_comum();
+            else if (collector.animacao_pendente == 2)
+                animacao_gameover();
+
+            while (kbhit()) getch();
+        }
+
         collector = atualiza_telas(collector);
         collector = desenha_telas(collector);
         collector = atualiza_contexto(collector);
@@ -63,6 +78,7 @@ struct contexto collector_contexto(void)
 static struct collector atualiza_telas(struct collector collector)
 {
     collector.contexto.tecla = 0;
+    collector.animacao_pendente = 0;
 
     if (kbhit())
         collector.contexto.tecla = getch();
@@ -136,8 +152,15 @@ static struct collector desenha_telas(struct collector collector)
 
 static struct collector atualiza_contexto(struct collector collector)
 {
-    if (contexto_alterado.alteracao & COLLECTOR_CONTEXTO_ALTERAR_TELA)
+    if (contexto_alterado.alteracao & COLLECTOR_CONTEXTO_ALTERAR_TELA
+        & ~COLLECTOR_CONTEXTO_REDESENHAR_TELA) {
         collector.contexto.tela = contexto_alterado.tela;
+
+        if (collector.contexto.tela == TELA_GAMEOVER)
+            collector.animacao_pendente = 2;
+        else
+            collector.animacao_pendente = 1;
+    }
 
     if (contexto_alterado.alteracao & COLLECTOR_CONTEXTO_REDESENHAR_TELA)
         collector.contexto.redesenhar = 1;
@@ -200,5 +223,104 @@ static struct collector verifica_novo_recorde(struct collector collector)
 
     collector.contexto.novo_recorde = 0;
     return collector;
+}
+
+static void animacao_comum(void)
+{
+    char linha_vazia[COLUNAS + 1];
+    int i, j;
+
+    memset(linha_vazia, ' ', sizeof(linha_vazia));
+    linha_vazia[COLUNAS] = '\0';
+
+    textcolor(WHITE);
+
+    for (i = 1; i <= METADE_LINHAS; ++i) {
+        textbackground(WHITE);
+
+        gotoxy(1, i);
+        cprintf("%s", linha_vazia);
+
+        gotoxy(1, LINHAS - (i - 1));
+        cprintf("%s", linha_vazia);
+
+        if (i > 1) {
+            textbackground(BLACK);
+
+            gotoxy(1, i - 1);
+            cprintf("%s", linha_vazia);
+
+            if (i <= LINHAS * 0.2)
+                textbackground(BLACK);
+
+            gotoxy(1, LINHAS - (i - 2));
+            cprintf("%s", linha_vazia);
+        }
+
+        gotoxy(METADE_COLUNAS, METADE_LINHAS);
+        msleep(50);
+    }
+
+    textbackground(BLACK);
+    for (j = METADE_COLUNAS; j > 0; --j) {
+        for (i = 0; i < 2; ++i) {
+            gotoxy(j, METADE_LINHAS + i);
+            cprintf(" ");
+
+            gotoxy(COLUNAS - (j - 1), METADE_LINHAS + i);
+            cprintf(" ");
+        }
+
+        gotoxy(METADE_COLUNAS, LINHAS);
+        msleep(30);
+    }
+}
+
+static void animacao_gameover(void)
+{
+    int i;
+    int bolas[COLUNAS + 1] = {0};
+
+    textcolor(WHITE);
+    while (bolas[COLUNAS] <= LINHAS) {
+        for (i = 1; i <= COLUNAS; ++i) {
+            if (bolas[i] > 0) {
+                if (bolas[i] <= LINHAS) {
+                    textbackground(WHITE);
+
+                    gotoxy(i, bolas[i]);
+                    cprintf(" ");
+
+                    gotoxy(COLUNAS + 1 - i, bolas[i]);
+                    cprintf(" ");
+                }
+
+                if (bolas[i] > 1) {
+                    textbackground(BLACK);
+
+                    gotoxy(i, bolas[i] - 1);
+                    cprintf(" ");
+
+                    gotoxy(COLUNAS + 1 - i, bolas[i] - 1);
+                    cprintf(" ");
+                }
+            }
+
+            if (i > 1)
+                bolas[i] += bolas[i] <= LINHAS && bolas[i - 1] > 3;
+            else
+                bolas[i] += bolas[i] <= LINHAS;
+        }
+
+        gotoxy(COLUNAS / 2, LINHAS);
+    }
+
+    textbackground(BLACK);
+
+    gotoxy(1, bolas[COLUNAS] - 1);
+    cprintf(" ");
+
+    gotoxy(COLUNAS, bolas[COLUNAS] - 1);
+    cprintf(" ");
 }
 

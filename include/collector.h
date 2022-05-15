@@ -42,6 +42,8 @@ struct contexto {
 struct collector {
     struct contexto contexto;
 
+    int animacao_pendente;
+
     struct {
         struct tela_inicial  inicial;
         struct tela_menu     menu;
