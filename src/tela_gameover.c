@@ -119,12 +119,12 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
         textcolor(WHITE);
 
         i = METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2 + 3;
-        j = METADE_LINHAS + tela.novo_recorde + 2;
+        y = METADE_LINHAS + tela.novo_recorde + 2;
 
-        gotoxy(i, j);
+        gotoxy(i, y);
         cprintf("%s", contexto.recordes[tela.novo_recorde - 1].nome);
 
-        gotoxy(i + tela.cursor.posicao, j);
+        gotoxy(i + tela.cursor.posicao, y);
         if (tela.cursor.mostrar)
             cprintf("_");
 
@@ -140,10 +140,18 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
         if (contexto.novo_recorde)
             y += 6;
 
-        textcolor(WHITE);
         gotoxy(METADE_COLUNAS - 15, y);
         cprintf("Precione b para voltar ao menu");
 
+        if (contexto.novo_recorde) {
+            i = METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2 + 3;
+            y = METADE_LINHAS + tela.novo_recorde + 2;
+
+            gotoxy(i, y);
+            cprintf("%s", contexto.recordes[tela.novo_recorde - 1].nome);
+        }
+
+        textcolor(WHITE);
         for (i = 0; i < NUMERO_LEGENDAS; ++i) {
             gotoxy(1, LINHAS - i);
             clreol();
