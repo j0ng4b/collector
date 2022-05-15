@@ -41,7 +41,9 @@ struct tela_niveis tela_niveis_atualiza(struct tela_niveis tela)
 
 struct tela_niveis tela_niveis_desenha(struct tela_niveis tela)
 {
-    char texto_dificuldades[NUMERO_NIVEIS_DIFICULDADE][TAMANHO_MAXIMO_TEXTOS] = {
+    struct contexto contexto = collector_contexto();
+
+    char texto_niveis[NUMERO_NIVEIS_DIFICULDADE][TAMANHO_MAXIMO_TEXTOS] = {
         "Facil", "Medio", "Dificil",
     };
 
@@ -51,53 +53,43 @@ struct tela_niveis tela_niveis_desenha(struct tela_niveis tela)
         "a/d: seleciona o nivel inicial"
     };
 
-    int i;
-    int j = METADE_LINHAS - 4;
+    int tamenho_texto_niveis = 0;
 
-    textcolor(WHITE);
+    int i, j;
+    int y = METADE_LINHAS - 4;
+
     clrscr();
 
-    gotoxy(METADE_COLUNAS - 7, j++);
-    cprintf("Nivel inicial");
+    for (i = 0; i < NUMERO_NIVEIS_DIFICULDADE; ++i)
+        tamenho_texto_niveis += strlen(texto_niveis[i]) + 2;
+    tamenho_texto_niveis /= 2;
 
+    textbackground(RED);
+    gotoxy(METADE_COLUNAS - 7, y++);
+    cprintf(" Nivel inicial ");
+
+    y++;
     for (i = 0; i < NUMERO_NIVEIS_DIFICULDADE; ++i) {
-        if (tela.nivel_selecionado == i)
-            textcolor(RED);
-        else
-            textcolor(WHITE);
+        gotoxy(METADE_COLUNAS - tamenho_texto_niveis, y++);
 
-        cprintf("%s", texto_dificuldades[i]);
+        if (tela.nivel_selecionado == i)
+            textbackground(RED);
+        else
+            textbackground(BLACK);
+
+        cprintf(" %s ", texto_niveis[i]);
+        tamenho_texto_niveis -= strlen(texto_niveis[i]) + 2;
     }
 
-    gotoxy(METADE_COLUNAS - 11, ++j);
-    gotoxy(METADE_COLUNAS - 3, j);
-    gotoxy(METADE_COLUNAS + 5, j++);
-
-    j += 2;
-
-    /*
-    textcolor(WHITE);
-
-    gotoxy(METADE_COLUNAS - 4, j++);
+    y += 2;
+    textbackground(BLACK);
+    gotoxy(METADE_COLUNAS - 4, y++);
     cprintf("Recordes");
 
-    for (k = 0; k < 3; ++k, ++j) {
-        gotoxy(METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2, j);
-
-        for (i = 0; i < RECORDE_MAXIMO_TEXTO_LINHA; ++i) {
-            if (i == 0 && (i += 3))
-                cprintf("%d. ", k + 1);
-            else if (i >= 4 && i - 4 < TAMANHO_NOME_RECORDE)
-                cprintf("%c", recorde_nomes[k][i - 4]);
-            else if (i - 4 == TAMANHO_NOME_RECORDE)
-                cprintf(" ");
-            else if (i == RECORDE_MAXIMO_TEXTO_LINHA - 9 && (i += 9))
-                cprintf(" %4d pts", recorde_maximos[k]);
-            else
-                cprintf(".");
-        }
-    }
-    */
+    i = METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2;
+    for (j = 0; j < 3; ++j)
+        desenha_linha_recorde(i, y + j, contexto.recordes[j].nome,
+            contexto.recordes[j].pontos, j + 1);
 
     textcolor(WHITE);
     for (i = 0; i < NUMERO_LEGENDAS; ++i) {
