@@ -9,11 +9,13 @@
 struct tela_menu tela_menu_nova(void)
 {
     struct tela_menu tela_menu;
+    struct janela_cores cores_janela = { BLACK, WHITE };
 
     tela_menu.opcao_selecionada = 0;
 
     tela_menu.janela.sair = janela_nova(20, 10, "Deseja realmente sair?",
-        "Caso saia do jogo todo seu progresso sera perdido!");
+        "Caso saia do jogo todo seu progresso sera perdido!",
+        cores_janela);
 
     tela_menu.janela.sair = janela_adiciona_botao(tela_menu.janela.sair,
         JANELA_BOTAO_ACEITAR, "Sim");
@@ -30,7 +32,8 @@ struct tela_menu tela_menu_nova(void)
         "3. Para contabilizar os pontos sera necessario guiar "
         "   a barra (coletor) ate o item para coleta-lo.      "
         "                                                     "
-        "4. A cada certa pontuacao a dificuldade aumenta.     ");
+        "4. A cada certa pontuacao a dificuldade aumenta.     ",
+        cores_janela);
 
     tela_menu.janela.informacoes = janela_adiciona_botao(tela_menu.janela.informacoes,
         JANELA_BOTAO_ACEITAR, "OK");

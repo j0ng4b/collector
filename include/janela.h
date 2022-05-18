@@ -22,6 +22,11 @@ enum janela_tipo_botao {
     JANELA_BOTAO_NULO
 };
 
+struct janela_cores {
+    int fundo;
+    int texto;
+};
+
 struct janela_botao {
     char texto[JANELA_TAMANHO_TEXTO_BOTAO];
     int tamanho_texto;
@@ -44,6 +49,8 @@ struct janela {
     int visivel;
     int criada;
 
+    struct janela_cores cor;
+
     enum janela_tipo_botao botao_clicado;
     struct janela_botao botoes[JANELA_NUMERO_BOTOES];
     int numero_botoes;
@@ -51,7 +58,8 @@ struct janela {
     int botao_selecionado;
 };
 
-struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[]);
+struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[],
+    struct janela_cores cor);
 
 struct janela janela_adiciona_botao(struct janela janela,
     enum janela_tipo_botao tipo, char texto_botao[JANELA_TAMANHO_TEXTO_BOTAO]);

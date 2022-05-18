@@ -2,7 +2,8 @@
 #include <conio2.h>
 #include "janela.h"
 
-struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[])
+struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[],
+    struct janela_cores cor)
 {
     int i, msg_pos;
     struct janela janela = { 0 };
@@ -46,6 +47,8 @@ struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[
 
     janela.x = METADE_COLUNAS - janela.largura / 2;
     janela.y = METADE_LINHAS - janela.altura / 2;
+
+    janela.cor = cor;
 
     janela.redesenhar = 1;
     janela.criada = 1;
@@ -114,6 +117,8 @@ struct janela janela_desenha(struct janela janela)
 
     janela.redesenhar = 0;
 
+    textcolor(janela.cor.texto);
+    textbackground(janela.cor.fundo);
     desenha_moldura(0, janela.x, janela.y, janela.largura, janela.altura);
 
     for (y = 0; y < janela.altura; ++y) {
@@ -127,13 +132,13 @@ struct janela janela_desenha(struct janela janela)
         if (x == janela.botao_selecionado)
             textbackground(RED);
         else
-            textbackground(BLACK);
+            textbackground(janela.cor.fundo);
 
         gotoxy(janela.x + janela.botoes[x].x, janela.y + janela.botoes[x].y);
         cprintf(" %s ", janela.botoes[x].texto);
     }
 
-    textbackground(BLACK);
+    textbackground(janela.cor.fundo);
     gotoxy(janela.x + 2, janela.y);
     cprintf(" %s ", janela.titulo);
 
