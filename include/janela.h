@@ -19,7 +19,7 @@ enum janela_tipo_botao {
     JANELA_BOTAO_NEGAR,
     JANELA_BOTAO_ACEITAR,
     JANELA_BOTAO_CANCELAR,
-    JANELA_BOTAO_NULO,
+    JANELA_BOTAO_NULO
 };
 
 struct janela_botao {

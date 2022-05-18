@@ -62,7 +62,7 @@ struct janela janela_adiciona_botao(struct janela janela,
 
     botao.tamanho_texto = strlen(texto_botao);
     if (botao.tamanho_texto >= JANELA_TAMANHO_TEXTO_BOTAO)
-        return (struct janela) { 0 };
+        return janela;
 
     strncpy(botao.texto, texto_botao, JANELA_TAMANHO_TEXTO_BOTAO);
     botao.tipo = tipo;

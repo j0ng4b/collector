@@ -10,7 +10,7 @@ static struct collector desenha_telas(struct collector collector);
 static struct collector atualiza_contexto(struct collector collector);
 static struct collector verifica_novo_recorde(struct collector);
 
-static void animacao_comum(void);
+static struct collector animacao_comum(struct collector collector);
 static void animacao_gameover(void);
 
 struct collector collector_novo(void)
@@ -35,6 +35,8 @@ struct collector collector_novo(void)
     collector.contexto.alteracao = COLLECTOR_CONTEXTO_SEM_ALTERACAO;
 
     collector.animacao_pendente = 0;
+    memset(collector.contexto.cores_fundo_animacao_normal, BLACK,
+        sizeof(collector.contexto.cores_fundo_animacao_normal));
 
     collector.tela.inicial = tela_inicial_nova();
     collector.tela.menu = tela_menu_nova();
@@ -50,7 +52,7 @@ void collector_rodar(struct collector collector)
     while (!collector.contexto.sair_do_jogo) {
         if (collector.animacao_pendente) {
             if (collector.animacao_pendente == 1)
-                animacao_comum();
+                collector = animacao_comum(collector);
             else if (collector.animacao_pendente == 2)
                 animacao_gameover();
 
@@ -180,6 +182,12 @@ static struct collector atualiza_contexto(struct collector collector)
     if (contexto_alterado.alteracao & COLLECTOR_CONTEXTO_SAIR_DO_JOGO)
         collector.contexto.sair_do_jogo = 1;
 
+    if (contexto_alterado.alteracao & COLLECTOR_CONTEXTO_CORES_FUNDO_ANIMACAO) {
+        memcpy(collector.contexto.cores_fundo_animacao_normal,
+            contexto_alterado.cores_fundo_animacao_normal,
+            sizeof(contexto_alterado.cores_fundo_animacao_normal));
+    }
+
     return collector;
 }
 
@@ -225,7 +233,7 @@ static struct collector verifica_novo_recorde(struct collector collector)
     return collector;
 }
 
-static void animacao_comum(void)
+static struct collector animacao_comum(struct collector collector)
 {
     char linha_vazia[COLUNAS + 1];
     int i, j;
@@ -245,14 +253,12 @@ static void animacao_comum(void)
         cprintf("%s", linha_vazia);
 
         if (i > 1) {
-            textbackground(BLACK);
+            textbackground(collector.contexto.cores_fundo_animacao_normal[i - 2]);
 
             gotoxy(1, i - 1);
             cprintf("%s", linha_vazia);
 
-            if (i <= LINHAS * 0.2)
-                textbackground(BLACK);
-
+            textbackground(collector.contexto.cores_fundo_animacao_normal[LINHAS - (i - 2) - 1]);
             gotoxy(1, LINHAS - (i - 2));
             cprintf("%s", linha_vazia);
         }
@@ -264,6 +270,7 @@ static void animacao_comum(void)
     textbackground(BLACK);
     for (j = METADE_COLUNAS; j > 0; --j) {
         for (i = 0; i < 2; ++i) {
+            textbackground(collector.contexto.cores_fundo_animacao_normal[METADE_LINHAS + i]);
             gotoxy(j, METADE_LINHAS + i);
             cprintf(" ");
 
@@ -272,8 +279,13 @@ static void animacao_comum(void)
         }
 
         gotoxy(METADE_COLUNAS, LINHAS);
-        msleep(30);
+        msleep(20);
     }
+
+    memset(collector.contexto.cores_fundo_animacao_normal, BLACK,
+        sizeof(collector.contexto.cores_fundo_animacao_normal));
+
+    return collector;
 }
 
 static void animacao_gameover(void)

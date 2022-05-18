@@ -3,13 +3,14 @@
 
 #include <time.h>
 #include "janela.h"
+#include "utilitarios.h"
 
 enum telas {
     TELA_INICIAL,
     TELA_MENU,
     TELA_NIVEIS,
     TELA_JOGO,
-    TELA_GAMEOVER,
+    TELA_GAMEOVER
 };
 
 
@@ -41,6 +42,7 @@ struct tela_menu tela_menu_desenha(struct tela_menu tela);
 
 /** Tela níveis */
 struct tela_niveis {
+    int cores_fundo_jogo[LINHAS];
     int nivel_selecionado;
 };
 

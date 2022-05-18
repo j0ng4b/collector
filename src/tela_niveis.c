@@ -1,3 +1,4 @@
+#include <strings.h>
 #include <conio2.h>
 #include "telas.h"
 #include "collector.h"
@@ -9,6 +10,13 @@
 struct tela_niveis tela_niveis_nova(void)
 {
     struct tela_niveis tela = { 0 };
+    int i;
+
+    for (i = 0; i < LINHAS; ++i)
+        if (i < LINHAS * 0.8)
+            tela.cores_fundo_jogo[i] = BLUE;
+        else
+            tela.cores_fundo_jogo[i] = GREEN;
 
     tela.nivel_selecionado = 0;
     return tela;
@@ -28,11 +36,16 @@ struct tela_niveis tela_niveis_atualiza(struct tela_niveis tela)
     } else if (contexto.tecla == 'b') {
         contexto.tela = TELA_MENU;
         contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA;
+
     } else if (contexto.tecla == '\r') {
         contexto.tela = TELA_JOGO;
         contexto.nivel_dificuldade = tela.nivel_selecionado;
         contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA |
-            COLLECTOR_CONTEXTO_ALTERAR_NIVEL;
+            COLLECTOR_CONTEXTO_ALTERAR_NIVEL |
+            COLLECTOR_CONTEXTO_CORES_FUNDO_ANIMACAO;
+
+        memcpy(contexto.cores_fundo_animacao_normal, tela.cores_fundo_jogo,
+            sizeof(tela.cores_fundo_jogo));
     }
 
     collector_altera_contexto(contexto);

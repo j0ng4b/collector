@@ -2,6 +2,7 @@
 #define COLLECTOR_H
 
 #include "telas.h"
+#include "utilitarios.h"
 
 #define RECORDE_MAXIMO_TEXTO_LINHA 43
 #define RECORDE_TAMANHO_NOME       11
@@ -9,6 +10,7 @@
 
 enum collector_tipo_alteracao_contexto {
     COLLECTOR_CONTEXTO_REDESENHAR_TELA = 0x00000010,
+    COLLECTOR_CONTEXTO_CORES_FUNDO_ANIMACAO = 0x00000020,
 
     COLLECTOR_CONTEXTO_ALTERAR_TELA = (COLLECTOR_CONTEXTO_REDESENHAR_TELA | 0x00000002),
     COLLECTOR_CONTEXTO_ALTERAR_NIVEL = 0x00000004,
@@ -16,7 +18,7 @@ enum collector_tipo_alteracao_contexto {
     COLLECTOR_CONTEXTO_ALTERAR_RECORDE = 0x0000001,
 
     COLLECTOR_CONTEXTO_SAIR_DO_JOGO  = 0x10000000,
-    COLLECTOR_CONTEXTO_SEM_ALTERACAO = 0x00000000,
+    COLLECTOR_CONTEXTO_SEM_ALTERACAO = 0x00000000
 };
 
 struct contexto {
@@ -36,6 +38,7 @@ struct contexto {
     } recordes[RECORDE_QUANTIDADE];
     int novo_recorde;
 
+    int cores_fundo_animacao_normal[LINHAS];
     enum collector_tipo_alteracao_contexto alteracao;
 };
 
