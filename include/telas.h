@@ -67,6 +67,11 @@ struct tela_jogo {
         float velocidade_y;
     } bola;
 
+    struct {
+        struct janela pausa;
+        int estava_visivel;
+    } janela;
+
     clock_t temporizador;
 };
 
