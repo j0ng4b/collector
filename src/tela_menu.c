@@ -14,7 +14,7 @@ struct tela_menu tela_menu_nova(void)
     tela_menu.opcao_selecionada = 0;
 
     tela_menu.janela.sair = janela_nova(20, 10, "Deseja realmente sair?",
-        "Caso saia do jogo todo seu progresso sera perdido!",
+        "Se sim, sem problemas seus recordes não serão perdidos.",
         cores_janela);
 
     tela_menu.janela.sair = janela_adiciona_botao(tela_menu.janela.sair,

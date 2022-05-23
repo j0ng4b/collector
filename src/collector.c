@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <conio2.h>
 #include "collector.h"
@@ -9,6 +10,9 @@ static struct collector atualiza_telas(struct collector collector);
 static struct collector desenha_telas(struct collector collector);
 static struct collector atualiza_contexto(struct collector collector);
 static struct collector verifica_novo_recorde(struct collector);
+
+static struct collector carrega_recorde_salvo(struct collector collector);
+static void salva_recordes(struct collector collector);
 
 static struct collector animacao_comum(struct collector collector);
 static void animacao_gameover(void);
@@ -44,7 +48,7 @@ struct collector collector_novo(void)
     collector.tela.jogo = tela_jogo_nova();
     collector.tela.gameover = tela_gameover_nova();
 
-    return collector;
+    return carrega_recorde_salvo(collector);
 }
 
 void collector_rodar(struct collector collector)
@@ -65,6 +69,8 @@ void collector_rodar(struct collector collector)
 
         gotoxy(METADE_COLUNAS, LINHAS);
     }
+
+    salva_recordes(collector);
 }
 
 void collector_altera_contexto(struct contexto contexto)
@@ -231,6 +237,40 @@ static struct collector verifica_novo_recorde(struct collector collector)
 
     collector.contexto.novo_recorde = 0;
     return collector;
+}
+
+static struct collector carrega_recorde_salvo(struct collector collector)
+{
+    int c;
+    FILE *arquivo_recordes = fopen("recordes.rcd", "r");
+
+    if (arquivo_recordes == NULL)
+        return collector;
+
+    while ((c = fgetc(arquivo_recordes)) == '#')
+        while ((c = fgetc(arquivo_recordes)) != '\n');
+    ungetc(c, arquivo_recordes);
+
+    fread(&collector.contexto.recordes, sizeof(collector.contexto.recordes), 1,
+        arquivo_recordes);
+
+    return collector;
+}
+
+static void salva_recordes(struct collector collector)
+{
+    FILE *arquivo_recordes = fopen("recordes.rcd", "w");
+
+    if (arquivo_recordes == NULL)
+        return;
+
+    fprintf(arquivo_recordes,
+        "# Aposto que entrou aqui por curiosidade não é? ;) mas lembresse:\n"
+        "#  'A curiosodade matou o gato'\n"
+        "# então aconselho que não toque nas próximas linhas nem mesmo em um byte!\n");
+
+    fwrite(&collector.contexto.recordes, sizeof(collector.contexto.recordes), 1,
+        arquivo_recordes);
 }
 
 static struct collector animacao_comum(struct collector collector)
