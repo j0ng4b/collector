@@ -1,4 +1,5 @@
 #include <string.h>
+#include <time.h>
 #include <conio2.h>
 #include "janela.h"
 
@@ -56,6 +57,32 @@ struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[
     return janela;
 }
 
+struct janela janela_tempo_nova(int tempo_em_segundos, struct janela_cores cor)
+{
+    struct janela janela = { 0 };
+
+    janela.tipo = 1;
+
+    janela.tempo.maximo = tempo_em_segundos;
+    janela.tempo.atual = tempo_em_segundos;
+
+    for (; tempo_em_segundos; janela.largura++,
+        tempo_em_segundos /= 10);
+
+    janela.largura += 4;
+    janela.altura = 5;
+
+    janela.x = METADE_COLUNAS - janela.largura / 2;
+    janela.y = METADE_LINHAS - janela.altura / 2;
+
+    janela.cor = cor;
+
+    janela.redesenhar = 1;
+    janela.criada = 1;
+
+    return janela;
+}
+
 struct janela janela_adiciona_botao(struct janela janela,
     enum janela_tipo_botao tipo, char texto_botao[JANELA_TAMANHO_TEXTO_BOTAO])
 {
@@ -91,6 +118,21 @@ struct janela janela_atualiza(struct janela janela, int tecla)
     if (!janela.visivel)
         return janela;
 
+    if (janela.tipo) {
+        if ((clock() - janela.tempo.temporizador) / (double) CLOCKS_PER_SEC > 1) {
+            janela.redesenhar = 1;
+            janela.tempo.atual -= janela.tempo.temporizador != 0 ? 1 : 0;
+            janela.tempo.temporizador = clock();
+        }
+
+        if (janela.tempo.atual <= 0) {
+            janela.tempo.atual = 0;
+            janela.visivel = 0;
+        }
+
+        return janela;
+    }
+
     janela.botao_clicado = JANELA_BOTAO_NULO;
 
     if (tecla == 'a' && janela.botao_selecionado > 0) {
@@ -121,6 +163,14 @@ struct janela janela_desenha(struct janela janela)
     textbackground(janela.cor.fundo);
     desenha_moldura(0, janela.x, janela.y, janela.largura, janela.altura);
 
+    if (janela.tipo) {
+        gotoxy(janela.x + janela.largura / 2 - (janela.largura - 4) / 2,
+            janela.y + 2);
+        cprintf("%0*d", janela.largura - 4, janela.tempo.atual);
+
+        return janela;
+    }
+
     for (y = 0; y < janela.altura; ++y) {
         if (y > 1 && y - 2 < janela.mensagem_linhas) {
             gotoxy(janela.x + 2, janela.y + y);
@@ -141,6 +191,16 @@ struct janela janela_desenha(struct janela janela)
     textbackground(janela.cor.fundo);
     gotoxy(janela.x + 2, janela.y);
     cprintf(" %s ", janela.titulo);
+
+    return janela;
+}
+
+struct janela janela_tempo_reiniciar(struct janela janela)
+{
+    janela.tempo.atual = janela.tempo.maximo;
+    janela.tempo.temporizador = 0;
+    janela.visivel = 1;
+    janela.redesenhar = 1;
 
     return janela;
 }

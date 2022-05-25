@@ -1,6 +1,7 @@
 #ifndef COLLECTOR_JANELA_H
 #define COLLECTOR_JANELA_H
 
+#include <time.h>
 #include "utilitarios.h"
 
 #define JANELA_NUMERO_BOTOES          3
@@ -56,10 +57,20 @@ struct janela {
     int numero_botoes;
     int tamanho_texto_botoes;
     int botao_selecionado;
+
+    int tipo;
+
+    struct {
+        int atual;
+        int maximo;
+        clock_t temporizador;
+    } tempo;
 };
 
 struct janela janela_nova(int largura, int altura, char titulo[], char mensagem[],
     struct janela_cores cor);
+
+struct janela janela_tempo_nova(int tempo_em_segundos, struct janela_cores cor);
 
 struct janela janela_adiciona_botao(struct janela janela,
     enum janela_tipo_botao tipo, char texto_botao[JANELA_TAMANHO_TEXTO_BOTAO]);
@@ -67,6 +78,8 @@ struct janela janela_adiciona_botao(struct janela janela,
 struct janela janela_atualiza(struct janela janela, int tecla);
 
 struct janela janela_desenha(struct janela janela);
+
+struct janela janela_tempo_reiniciar(struct janela janela);
 
 struct janela janela_mostrar(struct janela janela);
 
