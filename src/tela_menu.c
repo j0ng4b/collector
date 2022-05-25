@@ -8,63 +8,77 @@
 
 struct tela_menu tela_menu_nova(void)
 {
-    struct tela_menu tela_menu;
-    struct janela_cores cores_janela = { BLACK, WHITE };
+    struct tela_menu tela = { 0 };
 
-    tela_menu.opcao_selecionada = 0;
+    struct janela_config janela_sair_config = {
+        { 20, 10 },
+        {
+            "Deseja realmente sair?",
+            "Se sim, sem problemas, seus recordes nao serao perdidos.",
 
-    tela_menu.janela.sair = janela_nova(20, 10, "Deseja realmente sair?",
-        "Se sim, sem problemas, seus recordes nao serao perdidos.",
-        cores_janela);
+            0
+        }, 0,
+        { BLACK, WHITE },
+        JANELA_COMUM
+    };
 
-    tela_menu.janela.sair = janela_adiciona_botao(tela_menu.janela.sair,
-        JANELA_BOTAO_ACEITAR, "Sim");
-    tela_menu.janela.sair = janela_adiciona_botao(tela_menu.janela.sair,
-        JANELA_BOTAO_NEGAR, "Nao");
+    struct janela_config janela_informacoes_config = {
+        { 57, 15 },
+        {
+            "Informacoes",
+            "1. Ao iniciar o jogo as teclas responsaveis por mover"
+            "   a barra (coletor) serao a e d.                    "
+            "                                                     "
+            "2. Quando o jogo for iniciado o objetivo sera nao    "
+            "   deixar nenhum item cair no chao.                  "
+            "                                                     "
+            "3. Para contabilizar os pontos sera necessario guiar "
+            "   a barra (coletor) ate o item para coleta-lo.      "
+            "                                                     "
+            "4. A cada certa pontuacao a dificuldade aumenta.     ",
 
-    tela_menu.janela.informacoes = janela_nova(57, 15, "Informacoes",
-        "1. Ao iniciar o jogo as teclas responsaveis por mover"
-        "   a barra (coletor) serao a e d.                    "
-        "                                                     "
-        "2. Quando o jogo for iniciado o objetivo sera nao    "
-        "   deixar nenhum item cair no chao.                  "
-        "                                                     "
-        "3. Para contabilizar os pontos sera necessario guiar "
-        "   a barra (coletor) ate o item para coleta-lo.      "
-        "                                                     "
-        "4. A cada certa pontuacao a dificuldade aumenta.     ",
-        cores_janela);
+            1
+        }, 0,
+        { BLACK, WHITE },
+        JANELA_COMUM
+    };
 
-    tela_menu.janela.informacoes = janela_adiciona_botao(tela_menu.janela.informacoes,
-        JANELA_BOTAO_ACEITAR, "OK");
 
-    return tela_menu;
+    janela_nova(&tela.janela.sair, &janela_sair_config);
+
+    janela_adiciona_botao(&tela.janela.sair, JANELA_BOTAO_ACEITAR, "Sim");
+    janela_adiciona_botao(&tela.janela.sair, JANELA_BOTAO_NEGAR, "Nao");
+
+    janela_nova(&tela.janela.informacoes, &janela_informacoes_config);
+
+    janela_adiciona_botao(&tela.janela.informacoes, JANELA_BOTAO_ACEITAR, "OK");
+
+    tela.opcao_selecionada = 0;
+    return tela;
 }
 
 struct tela_menu tela_menu_atualiza(struct tela_menu tela)
 {
-    int janela_botao_selecionado = tela.janela.sair.botao_selecionado;
     struct contexto contexto = collector_contexto();
 
     if (tela.janela.sair.visivel) {
-        tela.janela.sair = janela_atualiza(tela.janela.sair, contexto.tecla);
-
-        if (janela_botao_selecionado != tela.janela.sair.botao_selecionado)
-            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
-
-        switch (tela.janela.sair.botao_clicado) {
+        switch (janela_atualiza(&tela.janela.sair, contexto.tecla)) {
         case JANELA_BOTAO_ACEITAR:
             contexto.alteracao = COLLECTOR_CONTEXTO_SAIR_DO_JOGO;
             break;
 
+        case JANELA_BOTAO_NEGAR:
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+            break;
+
         default:
+            if (tela.janela.sair.redesenhar)
+                contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
         }
     } else if (tela.janela.informacoes.visivel) {
-        tela.janela.informacoes = janela_atualiza(tela.janela.informacoes,
-            contexto.tecla);
-
-        if (tela.janela.sair.botao_clicado != JANELA_BOTAO_NULO)
+        if (janela_atualiza(&tela.janela.informacoes, contexto.tecla)
+            != JANELA_BOTAO_NULO)
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
     } else if (contexto.tecla == '\r') {
@@ -76,12 +90,12 @@ struct tela_menu tela_menu_atualiza(struct tela_menu tela)
             break;
 
         case 1:
-            tela.janela.informacoes = janela_mostrar(tela.janela.informacoes);
+            janela_mostrar(&tela.janela.informacoes);
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
 
         case 2:
-            tela.janela.sair = janela_mostrar(tela.janela.sair);
+            janela_mostrar(&tela.janela.sair);
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
         }
@@ -110,10 +124,10 @@ struct tela_menu tela_menu_desenha(struct tela_menu tela)
     int i;
 
     if (tela.janela.sair.visivel) {
-        tela.janela.sair = janela_desenha(tela.janela.sair);
+        janela_desenha(&tela.janela.sair);
         return tela;
     } else if (tela.janela.informacoes.visivel) {
-        tela.janela.informacoes = janela_desenha(tela.janela.informacoes);
+        janela_desenha(&tela.janela.informacoes);
         return tela;
     }
 

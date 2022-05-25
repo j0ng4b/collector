@@ -15,19 +15,34 @@ static struct tela_jogo reinicia_jogo(struct tela_jogo tela);
 struct tela_jogo tela_jogo_nova(void)
 {
     struct tela_jogo tela = { 0 };
-    struct janela_cores cores_janela = { BLUE, WHITE };
+
+    struct janela_config janela_pausa_config = {
+        { 30, 6 },
+        {
+            "Jogo pausado",
+            "Voltar ao menu de niveis?",
+
+            0
+        }, 0,
+        { BLUE, WHITE },
+        JANELA_COMUM
+    };
+
+    struct janela_config janela_timer_config = {
+        { 0 },
+        { 0 },
+        5,
+        { BLUE, WHITE },
+        JANELA_TEMPORIZADORA
+    };
 
     srand(time(NULL));
-    tela.janela.pausa = janela_nova(30, 6, "Jogo pausado",
-        "Voltar ao menu de niveis?", cores_janela);
+    janela_nova(&tela.janela.pausa, &janela_pausa_config);
 
-    tela.janela.pausa = janela_adiciona_botao(tela.janela.pausa,
-        JANELA_BOTAO_ACEITAR, "Sim");
+    janela_adiciona_botao(&tela.janela.pausa, JANELA_BOTAO_ACEITAR, "Sim");
+    janela_adiciona_botao(&tela.janela.pausa, JANELA_BOTAO_NEGAR, "Nao");
 
-    tela.janela.pausa = janela_adiciona_botao(tela.janela.pausa,
-        JANELA_BOTAO_NEGAR, "Nao");
-
-    tela.janela.timer = janela_tempo_nova(5, cores_janela);
+    janela_nova(&tela.janela.timer, &janela_timer_config);
 
     return reinicia_jogo(tela);
 }
@@ -41,21 +56,18 @@ struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela)
             tela.janela.pausa.visivel = 0;
             tela.janela.estava_visivel = 1;
         } else {
-            tela.janela.pausa = janela_mostrar(tela.janela.pausa);
+            janela_mostrar(&tela.janela.pausa);
         }
 
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
     }
 
     if (tela.janela.pausa.visivel) {
-        tela.janela.estava_visivel = 1;
-        tela.janela.pausa = janela_atualiza(tela.janela.pausa, contexto.tecla);
-        tela.janela.estava_visivel ^= tela.janela.pausa.visivel;
-
         if (tela.janela.timer.redesenhar)
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
-        switch (tela.janela.pausa.botao_clicado) {
+        tela.janela.estava_visivel = 1;
+        switch (janela_atualiza(&tela.janela.pausa, contexto.tecla)) {
         case JANELA_BOTAO_ACEITAR:
             tela = reinicia_jogo(tela);
 
@@ -66,12 +78,13 @@ struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela)
         default:
             break;
         }
+        tela.janela.estava_visivel ^= tela.janela.pausa.visivel;
 
         collector_altera_contexto(contexto);
         return tela;
     } else if (tela.janela.timer.visivel) {
         tela.janela.estava_visivel = 1;
-        tela.janela.timer = janela_atualiza(tela.janela.timer, contexto.tecla);
+        janela_atualiza(&tela.janela.timer, contexto.tecla);
         tela.janela.estava_visivel ^= tela.janela.timer.visivel;
 
         if (tela.janela.timer.redesenhar)
@@ -154,10 +167,10 @@ struct tela_jogo tela_jogo_desenha(struct tela_jogo tela)
         gotoxy(COLUNAS - 6, 1);
         cprintf(" |> ");
 
-        tela.janela.pausa = janela_desenha(tela.janela.pausa);
+        janela_desenha(&tela.janela.pausa);
         return tela;
     } else if (tela.janela.timer.visivel) {
-        tela.janela.timer = janela_desenha(tela.janela.timer);
+        janela_desenha(&tela.janela.timer);
 
         if (!tela.janela.pre_timer)
             return tela;
@@ -170,9 +183,9 @@ struct tela_jogo tela_jogo_desenha(struct tela_jogo tela)
 
     if (tela.janela.estava_visivel) {
         textbackground(BLUE);
-        for (i = 0; i < tela.janela.pausa.altura; ++i) {
-            gotoxy(tela.janela.pausa.x, tela.janela.pausa.y + i);
-            cprintf("%.*s", tela.janela.pausa.largura, linha_vazia);
+        for (i = 0; i < tela.janela.pausa.tamanho.altura; ++i) {
+            gotoxy(tela.janela.pausa.posicao.x, tela.janela.pausa.posicao.y + i);
+            cprintf("%.*s", tela.janela.pausa.tamanho.largura, linha_vazia);
         }
 
         tela.janela.estava_visivel = 0;
@@ -231,7 +244,7 @@ struct tela_jogo reinicia_jogo(struct tela_jogo tela)
     tela.bola.posicao_y = POSICAO_INICIAL_BOLA;
     tela.bola.velocidade_y = 0.3;
 
-    tela.janela.timer = janela_tempo_reiniciar(tela.janela.timer);
+    janela_reiniciar_tempo(&tela.janela.timer);
     tela.janela.pre_timer = 2;
 
     return tela;
