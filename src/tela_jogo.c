@@ -162,7 +162,7 @@ struct tela_jogo tela_jogo_desenha(struct tela_jogo tela)
         if (!tela.janela.pre_timer)
             return tela;
         else
-            tela.janela.pre_timer = 0;
+            tela.janela.pre_timer -= tela.janela.pre_timer > 0;
     }
 
     memset(linha_vazia, ' ', sizeof(linha_vazia));
@@ -232,7 +232,7 @@ struct tela_jogo reinicia_jogo(struct tela_jogo tela)
     tela.bola.velocidade_y = 0.3;
 
     tela.janela.timer = janela_tempo_reiniciar(tela.janela.timer);
-    tela.janela.pre_timer = 1;
+    tela.janela.pre_timer = 2;
 
     return tela;
 }
