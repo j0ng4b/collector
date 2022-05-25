@@ -120,15 +120,16 @@ struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela)
         break;
     }
 
-    if (tela.bola.posicao_y == tela.coletor.posicao_y) {
-        if (tela.bola.posicao_x >= tela.coletor.posicao_x
+    if (tela.bola.posicao_y >= tela.coletor.posicao_y) {
+        if (tela.bola.posicao_y == tela.coletor.posicao_y
+            && tela.bola.posicao_x >= tela.coletor.posicao_x
             && tela.bola.posicao_x < tela.coletor.posicao_x
                 + LARGURA_COLETOR) {
             tela.bola.posicao_x = 1 + rand() % COLUNAS;
             tela.bola.posicao_y = POSICAO_INICIAL_BOLA;
 
             tela.coletor.pontos++;
-        } else {
+        } else if (tela.bola.posicao_y - 2 == tela.coletor.posicao_y) {
             contexto.pontos = tela.coletor.pontos;
             tela = reinicia_jogo(tela);
 
@@ -198,8 +199,11 @@ struct tela_jogo tela_jogo_desenha(struct tela_jogo tela)
         gotoxy(1, tela.coletor.posicao_y - (1 - i));
         cprintf("%s", linha_vazia);
 
-        textbackground(i == 0 ? YELLOW : BLUE);
-        gotoxy(tela.bola.posicao_x, tela.bola.posicao_y - i);
+        if (i == 0 && tela.bola.posicao_y == POSICAO_INICIAL_BOLA)
+            continue;
+
+        textbackground(i ? YELLOW : BLUE);
+        gotoxy(tela.bola.posicao_x, tela.bola.posicao_y - (1 - i));
         cprintf(" ");
     }
 
