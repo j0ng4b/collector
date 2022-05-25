@@ -18,8 +18,6 @@ struct tela_jogo tela_jogo_nova(void)
     struct janela_cores cores_janela = { BLUE, WHITE };
 
     srand(time(NULL));
-    tela = reinicia_jogo(tela);
-
     tela.janela.pausa = janela_nova(30, 6, "Jogo pausado",
         "Voltar ao menu de niveis?", cores_janela);
 
@@ -29,13 +27,14 @@ struct tela_jogo tela_jogo_nova(void)
     tela.janela.pausa = janela_adiciona_botao(tela.janela.pausa,
         JANELA_BOTAO_NEGAR, "Nao");
 
-    return tela;
+    tela.janela.timer = janela_tempo_nova(5, cores_janela);
+
+    return reinicia_jogo(tela);
 }
 
 struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela)
 {
     struct contexto contexto = collector_contexto();
-    int janela_botao_selecionado = tela.janela.pausa.botao_selecionado;
 
     if (tolower(contexto.tecla) == 'p') {
         if (tela.janela.pausa.visivel) {
@@ -49,12 +48,12 @@ struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela)
     }
 
     if (tela.janela.pausa.visivel) {
+        tela.janela.estava_visivel = 1;
         tela.janela.pausa = janela_atualiza(tela.janela.pausa, contexto.tecla);
+        tela.janela.estava_visivel ^= tela.janela.pausa.visivel;
 
-        if (janela_botao_selecionado != tela.janela.pausa.botao_selecionado) {
-            tela.janela.estava_visivel = 1;
+        if (tela.janela.timer.redesenhar)
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
-        }
 
         switch (tela.janela.pausa.botao_clicado) {
         case JANELA_BOTAO_ACEITAR:
@@ -67,6 +66,16 @@ struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela)
         default:
             break;
         }
+
+        collector_altera_contexto(contexto);
+        return tela;
+    } else if (tela.janela.timer.visivel) {
+        tela.janela.estava_visivel = 1;
+        tela.janela.timer = janela_atualiza(tela.janela.timer, contexto.tecla);
+        tela.janela.estava_visivel ^= tela.janela.timer.visivel;
+
+        if (tela.janela.timer.redesenhar)
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
         collector_altera_contexto(contexto);
         return tela;
@@ -146,6 +155,13 @@ struct tela_jogo tela_jogo_desenha(struct tela_jogo tela)
 
         tela.janela.pausa = janela_desenha(tela.janela.pausa);
         return tela;
+    } else if (tela.janela.timer.visivel) {
+        tela.janela.timer = janela_desenha(tela.janela.timer);
+
+        if (!tela.janela.pre_timer)
+            return tela;
+        else
+            tela.janela.pre_timer = 0;
     }
 
     memset(linha_vazia, ' ', sizeof(linha_vazia));
@@ -210,6 +226,9 @@ struct tela_jogo reinicia_jogo(struct tela_jogo tela)
     tela.bola.posicao_x = 1 + rand() % COLUNAS;
     tela.bola.posicao_y = POSICAO_INICIAL_BOLA;
     tela.bola.velocidade_y = 0.3;
+
+    tela.janela.timer = janela_tempo_reiniciar(tela.janela.timer);
+    tela.janela.pre_timer = 1;
 
     return tela;
 }

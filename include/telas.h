@@ -69,6 +69,8 @@ struct tela_jogo {
 
     struct {
         struct janela pausa;
+        struct janela timer;
+        int pre_timer;
         int estava_visivel;
     } janela;
 
