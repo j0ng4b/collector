@@ -239,6 +239,8 @@ static void reinicia_jogo(struct tela_jogo *tela)
     tela->bola.posicao_y = POSICAO_INICIAL_BOLA;
     tela->bola.velocidade_y = 0.3;
 
+    tela->temporizador = clock();
+
     janela_reiniciar_tempo(&tela->janela.timer);
     tela->janela.pre_timer = 2;
 }
