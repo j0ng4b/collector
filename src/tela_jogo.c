@@ -49,7 +49,7 @@ void tela_jogo_atualiza(struct tela_jogo *tela)
 {
     struct contexto contexto = collector_contexto();
 
-    if (tolower(contexto.tecla) == 'p') {
+    if (tolower(contexto.tecla) == 'p' && !tela->janela.timer.visivel) {
         if (tela->janela.pausa.visivel) {
             tela->janela.pausa.visivel = 0;
             tela->janela.estava_visivel = 1;
@@ -61,7 +61,7 @@ void tela_jogo_atualiza(struct tela_jogo *tela)
     }
 
     if (tela->janela.pausa.visivel) {
-        if (tela->janela.timer.redesenhar)
+        if (tela->janela.pausa.redesenhar)
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
         tela->janela.estava_visivel = 1;
