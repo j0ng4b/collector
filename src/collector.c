@@ -46,6 +46,7 @@ void collector_novo(struct collector *collector)
     tela_niveis_nova(&collector->tela.niveis);
     tela_jogo_nova(&collector->tela.jogo);
     tela_gameover_nova(&collector->tela.gameover);
+    tela_creditos_nova(&collector->tela.creditos);
 
     carrega_recorde_salvo(collector);
 }
@@ -118,6 +119,10 @@ static void atualiza_telas(struct collector *collector)
         tela_gameover_atualiza(&collector->tela.gameover);
         break;
 
+    case TELA_CREDITOS:
+        tela_creditos_atualiza(&collector->tela.creditos);
+        break;
+
     default:
         break;
     }
@@ -147,6 +152,10 @@ static void desenha_telas(struct collector *collector)
 
     case TELA_GAMEOVER:
         tela_gameover_desenha(&collector->tela.gameover);
+        break;
+
+    case TELA_CREDITOS:
+        tela_creditos_desenha(&collector->tela.creditos);
         break;
 
     default:

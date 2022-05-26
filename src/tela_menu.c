@@ -2,7 +2,7 @@
 #include "telas.h"
 #include "collector.h"
 
-#define TELA_MENU_NUMERO_OPCOES   3
+#define TELA_MENU_NUMERO_OPCOES   4
 #define TELA_MENU_NUMERO_LEGENDAS 3
 #define TELA_MENU_TAMANHO_TEXTOS  30
 
@@ -92,6 +92,10 @@ void tela_menu_atualiza(struct tela_menu *tela)
             break;
 
         case 2:
+            contexto.tela = TELA_CREDITOS;
+            break;
+
+        case 3:
             janela_mostrar(&tela->janela.sair);
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
@@ -99,7 +103,8 @@ void tela_menu_atualiza(struct tela_menu *tela)
     } else if (contexto.tecla == 'w' && tela->opcao_selecionada > 0) {
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
         tela->opcao_selecionada--;
-    } else if (contexto.tecla == 's' && tela->opcao_selecionada < 2) {
+    } else if (contexto.tecla == 's'
+        && tela->opcao_selecionada < TELA_MENU_NUMERO_OPCOES - 1) {
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
         tela->opcao_selecionada++;
     }
@@ -114,7 +119,7 @@ void tela_menu_desenha(struct tela_menu *tela)
     };
 
     char opcoes[TELA_MENU_NUMERO_OPCOES][TELA_MENU_TAMANHO_TEXTOS] = {
-        "Iniciar", "Informacoes", "Sair",
+        "Iniciar", "Informacoes", "Creditos", "Sair",
     };
 
     int i;

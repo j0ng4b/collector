@@ -53,6 +53,7 @@ struct collector {
         struct tela_niveis   niveis;
         struct tela_jogo     jogo;
         struct tela_gameover gameover;
+        struct tela_creditos creditos;
     } tela;
 };
 
