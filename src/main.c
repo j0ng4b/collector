@@ -7,8 +7,8 @@ int main(void)
 
     setlocale(LC_ALL, "C.UTF-8");
 
-    collector = collector_novo();
-    collector_rodar(collector);
+    collector_novo(&collector);
+    collector_rodar(&collector);
 
     return 0;
 }

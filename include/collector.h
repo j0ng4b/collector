@@ -58,15 +58,15 @@ struct collector {
 
 /* collector_novo
  */
-struct collector collector_novo(void);
+void collector_novo(struct collector *collector);
 
 /* collector_rodar
  */
-void collector_rodar(struct collector collector);
+void collector_rodar(struct collector *collector);
 
 /* collector_altera_contexto
  */
-void collector_altera_contexto(struct contexto contexto);
+void collector_altera_contexto(struct contexto *contexto);
 
 /* collector_contexto
  */

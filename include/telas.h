@@ -20,9 +20,10 @@ struct tela_inicial {
     clock_t temporizador;
 };
 
-struct tela_inicial tela_inicial_nova(void);
-struct tela_inicial tela_inicial_atualiza(struct tela_inicial tela);
-struct tela_inicial tela_inicial_desenha(struct tela_inicial tela);
+void tela_inicial_nova(struct tela_inicial *tela);
+void tela_inicial_atualiza(struct tela_inicial *tela);
+void tela_inicial_desenha(struct tela_inicial *tela);
+void tela_inicial_sair(struct tela_inicial *tela);
 
 
 /** Tela menu */
@@ -35,9 +36,10 @@ struct tela_menu {
     int opcao_selecionada;
 };
 
-struct tela_menu tela_menu_nova(void);
-struct tela_menu tela_menu_atualiza(struct tela_menu tela);
-struct tela_menu tela_menu_desenha(struct tela_menu tela);
+void tela_menu_nova(struct tela_menu *tela);
+void tela_menu_atualiza(struct tela_menu *tela);
+void tela_menu_desenha(struct tela_menu *tela);
+void tela_menu_sair(struct tela_menu *tela);
 
 
 /** Tela níveis */
@@ -46,9 +48,10 @@ struct tela_niveis {
     int nivel_selecionado;
 };
 
-struct tela_niveis tela_niveis_nova(void);
-struct tela_niveis tela_niveis_atualiza(struct tela_niveis tela);
-struct tela_niveis tela_niveis_desenha(struct tela_niveis tela);
+void tela_niveis_nova(struct tela_niveis *tela);
+void tela_niveis_atualiza(struct tela_niveis *tela);
+void tela_niveis_desenha(struct tela_niveis *tela);
+void tela_niveis_sair(struct tela_niveis *tela);
 
 
 /** Tela jogo */
@@ -77,9 +80,10 @@ struct tela_jogo {
     clock_t temporizador;
 };
 
-struct tela_jogo tela_jogo_nova(void);
-struct tela_jogo tela_jogo_atualiza(struct tela_jogo tela);
-struct tela_jogo tela_jogo_desenha(struct tela_jogo tela);
+void tela_jogo_nova(struct tela_jogo *tela);
+void tela_jogo_atualiza(struct tela_jogo *tela);
+void tela_jogo_desenha(struct tela_jogo *tela);
+void tela_jogo_sair(struct tela_jogo *tela);
 
 
 /** Tela Gameover */
@@ -95,10 +99,10 @@ struct tela_gameover {
     clock_t temporizador;
 };
 
-struct tela_gameover tela_gameover_nova(void);
-struct tela_gameover tela_gameover_atualiza(struct tela_gameover tela);
-struct tela_gameover tela_gameover_desenha(struct tela_gameover tela);
-
+void tela_gameover_nova(struct tela_gameover *tela);
+void tela_gameover_atualiza(struct tela_gameover *tela);
+void tela_gameover_desenha(struct tela_gameover *tela);
+void tela_gameover_sair(struct tela_gameover *tela);
 
 #endif /* COLLECTOR_TELAS_H */
 

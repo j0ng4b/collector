@@ -6,10 +6,8 @@
 #define TELA_MENU_NUMERO_LEGENDAS 3
 #define TELA_MENU_TAMANHO_TEXTOS  30
 
-struct tela_menu tela_menu_nova(void)
+void tela_menu_nova(struct tela_menu *tela)
 {
-    struct tela_menu tela = { 0 };
-
     struct janela_config janela_sair_config = {
         { 20, 10 },
         {
@@ -44,25 +42,24 @@ struct tela_menu tela_menu_nova(void)
     };
 
 
-    janela_nova(&tela.janela.sair, &janela_sair_config);
+    janela_nova(&tela->janela.sair, &janela_sair_config);
 
-    janela_adiciona_botao(&tela.janela.sair, JANELA_BOTAO_ACEITAR, "Sim");
-    janela_adiciona_botao(&tela.janela.sair, JANELA_BOTAO_NEGAR, "Nao");
+    janela_adiciona_botao(&tela->janela.sair, JANELA_BOTAO_ACEITAR, "Sim");
+    janela_adiciona_botao(&tela->janela.sair, JANELA_BOTAO_NEGAR, "Nao");
 
-    janela_nova(&tela.janela.informacoes, &janela_informacoes_config);
+    janela_nova(&tela->janela.informacoes, &janela_informacoes_config);
 
-    janela_adiciona_botao(&tela.janela.informacoes, JANELA_BOTAO_ACEITAR, "OK");
+    janela_adiciona_botao(&tela->janela.informacoes, JANELA_BOTAO_ACEITAR, "OK");
 
-    tela.opcao_selecionada = 0;
-    return tela;
+    tela->opcao_selecionada = 0;
 }
 
-struct tela_menu tela_menu_atualiza(struct tela_menu tela)
+void tela_menu_atualiza(struct tela_menu *tela)
 {
     struct contexto contexto = collector_contexto();
 
-    if (tela.janela.sair.visivel) {
-        switch (janela_atualiza(&tela.janela.sair, contexto.tecla)) {
+    if (tela->janela.sair.visivel) {
+        switch (janela_atualiza(&tela->janela.sair, contexto.tecla)) {
         case JANELA_BOTAO_ACEITAR:
             contexto.alteracao = COLLECTOR_CONTEXTO_SAIR_DO_JOGO;
             break;
@@ -72,46 +69,45 @@ struct tela_menu tela_menu_atualiza(struct tela_menu tela)
             break;
 
         default:
-            if (tela.janela.sair.redesenhar)
+            if (tela->janela.sair.redesenhar)
                 contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
         }
-    } else if (tela.janela.informacoes.visivel) {
-        if (janela_atualiza(&tela.janela.informacoes, contexto.tecla)
+    } else if (tela->janela.informacoes.visivel) {
+        if (janela_atualiza(&tela->janela.informacoes, contexto.tecla)
             != JANELA_BOTAO_NULO)
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
     } else if (contexto.tecla == '\r') {
         contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA;
 
-        switch (tela.opcao_selecionada) {
+        switch (tela->opcao_selecionada) {
         case 0:
             contexto.tela = TELA_NIVEIS;
             break;
 
         case 1:
-            janela_mostrar(&tela.janela.informacoes);
+            janela_mostrar(&tela->janela.informacoes);
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
 
         case 2:
-            janela_mostrar(&tela.janela.sair);
+            janela_mostrar(&tela->janela.sair);
             contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
         }
-    } else if (contexto.tecla == 'w' && tela.opcao_selecionada > 0) {
+    } else if (contexto.tecla == 'w' && tela->opcao_selecionada > 0) {
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
-        tela.opcao_selecionada--;
-    } else if (contexto.tecla == 's' && tela.opcao_selecionada < 2) {
+        tela->opcao_selecionada--;
+    } else if (contexto.tecla == 's' && tela->opcao_selecionada < 2) {
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
-        tela.opcao_selecionada++;
+        tela->opcao_selecionada++;
     }
 
-    collector_altera_contexto(contexto);
-    return tela;
+    collector_altera_contexto(&contexto);
 }
 
-struct tela_menu tela_menu_desenha(struct tela_menu tela)
+void tela_menu_desenha(struct tela_menu *tela)
 {
     char legendas[TELA_MENU_NUMERO_LEGENDAS][TELA_MENU_TAMANHO_TEXTOS] = {
         "enter: confirmar selecao", "s: seta para baixo", "w: seta para cima",
@@ -123,12 +119,12 @@ struct tela_menu tela_menu_desenha(struct tela_menu tela)
 
     int i;
 
-    if (tela.janela.sair.visivel) {
-        janela_desenha(&tela.janela.sair);
-        return tela;
-    } else if (tela.janela.informacoes.visivel) {
-        janela_desenha(&tela.janela.informacoes);
-        return tela;
+    if (tela->janela.sair.visivel) {
+        janela_desenha(&tela->janela.sair);
+        return;
+    } else if (tela->janela.informacoes.visivel) {
+        janela_desenha(&tela->janela.informacoes);
+        return;
     }
 
     textbackground(BLACK);
@@ -136,7 +132,7 @@ struct tela_menu tela_menu_desenha(struct tela_menu tela)
     desenha_nome_jogo(METADE_COLUNAS - 36, LINHAS * 0.3);
 
     for (i = 0; i < TELA_MENU_NUMERO_OPCOES; ++i) {
-        if (i == tela.opcao_selecionada)
+        if (i == tela->opcao_selecionada)
             textbackground(RED);
         else
             textbackground(BLACK);
@@ -150,7 +146,5 @@ struct tela_menu tela_menu_desenha(struct tela_menu tela)
         gotoxy(1, LINHAS - i);
         cprintf("%s", legendas[i]);
     }
-
-    return tela;
 }
 

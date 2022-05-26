@@ -7,31 +7,29 @@
 #define NUMERO_NIVEIS_DIFICULDADE 3
 #define NUMERO_LEGENDAS           3
 
-struct tela_niveis tela_niveis_nova(void)
+void tela_niveis_nova(struct tela_niveis *tela)
 {
-    struct tela_niveis tela = { 0 };
     int i;
 
     for (i = 0; i < LINHAS; ++i)
         if (i < LINHAS * 0.8)
-            tela.cores_fundo_jogo[i] = BLUE;
+            tela->cores_fundo_jogo[i] = BLUE;
         else
-            tela.cores_fundo_jogo[i] = GREEN;
+            tela->cores_fundo_jogo[i] = GREEN;
 
-    tela.nivel_selecionado = 0;
-    return tela;
+    tela->nivel_selecionado = 0;
 }
 
-struct tela_niveis tela_niveis_atualiza(struct tela_niveis tela)
+void tela_niveis_atualiza(struct tela_niveis *tela)
 {
     struct contexto contexto = collector_contexto();
 
-    if (contexto.tecla == 'a' && tela.nivel_selecionado > 0) {
-        tela.nivel_selecionado--;
+    if (contexto.tecla == 'a' && tela->nivel_selecionado > 0) {
+        tela->nivel_selecionado--;
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
     } else if (contexto.tecla == 'd'
-        && tela.nivel_selecionado < NUMERO_NIVEIS_DIFICULDADE - 1) {
-        tela.nivel_selecionado++;
+        && tela->nivel_selecionado < NUMERO_NIVEIS_DIFICULDADE - 1) {
+        tela->nivel_selecionado++;
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
     } else if (contexto.tecla == 'b') {
         contexto.tela = TELA_MENU;
@@ -39,20 +37,19 @@ struct tela_niveis tela_niveis_atualiza(struct tela_niveis tela)
 
     } else if (contexto.tecla == '\r') {
         contexto.tela = TELA_JOGO;
-        contexto.nivel_dificuldade = tela.nivel_selecionado;
+        contexto.nivel_dificuldade = tela->nivel_selecionado;
         contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA |
             COLLECTOR_CONTEXTO_ALTERAR_NIVEL |
             COLLECTOR_CONTEXTO_CORES_FUNDO_ANIMACAO;
 
-        memcpy(contexto.cores_fundo_animacao_normal, tela.cores_fundo_jogo,
-            sizeof(tela.cores_fundo_jogo));
+        memcpy(contexto.cores_fundo_animacao_normal, tela->cores_fundo_jogo,
+            sizeof(tela->cores_fundo_jogo));
     }
 
-    collector_altera_contexto(contexto);
-    return tela;
+    collector_altera_contexto(&contexto);
 }
 
-struct tela_niveis tela_niveis_desenha(struct tela_niveis tela)
+void tela_niveis_desenha(struct tela_niveis *tela)
 {
     struct contexto contexto = collector_contexto();
 
@@ -85,7 +82,7 @@ struct tela_niveis tela_niveis_desenha(struct tela_niveis tela)
     for (i = 0; i < NUMERO_NIVEIS_DIFICULDADE; ++i) {
         gotoxy(METADE_COLUNAS - tamenho_texto_niveis, y++);
 
-        if (tela.nivel_selecionado == i)
+        if (tela->nivel_selecionado == i)
             textbackground(RED);
         else
             textbackground(BLACK);
@@ -109,7 +106,5 @@ struct tela_niveis tela_niveis_desenha(struct tela_niveis tela)
         gotoxy(1, LINHAS - i);
         cprintf("%s", texto_legendas[i]);
     }
-
-    return tela;
 }
 

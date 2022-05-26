@@ -9,65 +9,63 @@
 #define NUMERO_LEGENDAS         3
 #define VELOCIDADE_PISCA_CURSOR 0.3
 
-static struct tela_gameover reinicia_variaveis(struct tela_gameover tela);
+static void reinicia_variaveis(struct tela_gameover *tela);
 static void desenha_gameover(int x, int y);
 
-struct tela_gameover tela_gameover_nova(void)
+void tela_gameover_nova(struct tela_gameover *tela)
 {
-    struct tela_gameover tela = { 0 };
-    return reinicia_variaveis(tela);
+    reinicia_variaveis(tela);
 }
 
-struct tela_gameover tela_gameover_atualiza(struct tela_gameover tela)
+void tela_gameover_atualiza(struct tela_gameover *tela)
 {
     struct contexto contexto = collector_contexto();
 
-    tela.novo_recorde = contexto.novo_recorde;
-    if (tela.novo_recorde > 0 && tela.lendo_novo_recorde == 1) {
+    tela->novo_recorde = contexto.novo_recorde;
+    if (tela->novo_recorde > 0 && tela->lendo_novo_recorde == 1) {
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
 
         if (isalnum(contexto.tecla) || contexto.tecla == ' ') {
-            contexto.recordes[tela.novo_recorde - 1]
-                .nome[tela.cursor.posicao] = contexto.tecla;
+            contexto.recordes[tela->novo_recorde - 1]
+                .nome[tela->cursor.posicao] = contexto.tecla;
 
-            if (tela.cursor.posicao < RECORDE_TAMANHO_NOME - 2)
-                tela.cursor.posicao++;
+            if (tela->cursor.posicao < RECORDE_TAMANHO_NOME - 2)
+                tela->cursor.posicao++;
 
             contexto.alteracao |= COLLECTOR_CONTEXTO_ALTERAR_RECORDE;
         } else if ((contexto.tecla == 8 || contexto.tecla == 127)
-            && tela.cursor.posicao > 0) {
-            tela.cursor.posicao--;
+            && tela->cursor.posicao > 0) {
+            tela->cursor.posicao--;
         } else if (contexto.tecla == '\r'
-            && tela.cursor.posicao < RECORDE_TAMANHO_NOME - 1) {
-            tela.cursor.posicao++;
+            && tela->cursor.posicao < RECORDE_TAMANHO_NOME - 1) {
+            tela->cursor.posicao++;
         } else {
             contexto.alteracao = COLLECTOR_CONTEXTO_SEM_ALTERACAO;
         }
 
-        if (tela.cursor.posicao >= RECORDE_TAMANHO_NOME - 1)
-            tela.lendo_novo_recorde = 2;
+        if (tela->cursor.posicao >= RECORDE_TAMANHO_NOME - 1)
+            tela->lendo_novo_recorde = 2;
     }
 
-    if ((clock() - tela.temporizador) / (double) CLOCKS_PER_SEC >
+    if ((clock() - tela->temporizador) / (double) CLOCKS_PER_SEC >
         VELOCIDADE_PISCA_CURSOR) {
-        tela.cursor.mostrar = !tela.cursor.mostrar;
-        tela.temporizador = clock();
+        tela->cursor.mostrar = !tela->cursor.mostrar;
+        tela->temporizador = clock();
 
         contexto.alteracao |= COLLECTOR_CONTEXTO_REDESENHAR_TELA;
     }
 
-    if (contexto.tecla == 'b' && tela.lendo_novo_recorde == 2) {
-        tela = reinicia_variaveis(tela);
+    if (contexto.tecla == 'b' && tela->lendo_novo_recorde == 2) {
+        reinicia_variaveis(tela);
 
         contexto.tela = TELA_NIVEIS;
         contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA;
     }
 
-    collector_altera_contexto(contexto);
-    return tela;
+    collector_altera_contexto(&contexto);
 }
 
-struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
+void tela_gameover_desenha(struct tela_gameover *tela)
 {
     struct contexto contexto = collector_contexto();
 
@@ -83,7 +81,7 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
     if (contexto.novo_recorde)
         y -= 4;
 
-    switch (tela.lendo_novo_recorde) {
+    switch (tela->lendo_novo_recorde) {
     case 0:
         textcolor(RED);
         desenha_gameover(METADE_COLUNAS - 32, y);
@@ -92,7 +90,7 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
         for (i = j = 1; contexto.pontos / j; ++i, j *= 10);
 
         textcolor(WHITE);
-        if (tela.novo_recorde) {
+        if (tela->novo_recorde) {
             gotoxy(METADE_COLUNAS - (19 + i) / 2, y);
             cprintf("Novo recorde: %d pts!", contexto.pontos);
 
@@ -105,12 +103,12 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
                 desenha_linha_recorde(i, y + j, contexto.recordes[j].nome,
                     contexto.recordes[j].pontos, j + 1);
 
-            tela.lendo_novo_recorde = 1;
+            tela->lendo_novo_recorde = 1;
         } else {
             gotoxy(METADE_COLUNAS - (17 + i) / 2, y);
             cprintf("Seus pontos: %d pts", contexto.pontos);
 
-            tela.lendo_novo_recorde = 2;
+            tela->lendo_novo_recorde = 2;
         }
 
         break;
@@ -119,13 +117,13 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
         textcolor(WHITE);
 
         i = METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2 + 3;
-        y = METADE_LINHAS + tela.novo_recorde + 2;
+        y = METADE_LINHAS + tela->novo_recorde + 2;
 
         gotoxy(i, y);
-        cprintf("%s", contexto.recordes[tela.novo_recorde - 1].nome);
+        cprintf("%s", contexto.recordes[tela->novo_recorde - 1].nome);
 
-        gotoxy(i + tela.cursor.posicao, y);
-        if (tela.cursor.mostrar)
+        gotoxy(i + tela->cursor.posicao, y);
+        if (tela->cursor.mostrar)
             cprintf("_");
 
         for (i = 0; i < NUMERO_LEGENDAS; ++i) {
@@ -145,10 +143,10 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
 
         if (contexto.novo_recorde) {
             i = METADE_COLUNAS - RECORDE_MAXIMO_TEXTO_LINHA / 2 + 3;
-            y = METADE_LINHAS + tela.novo_recorde + 2;
+            y = METADE_LINHAS + tela->novo_recorde + 2;
 
             gotoxy(i, y);
-            cprintf("%s", contexto.recordes[tela.novo_recorde - 1].nome);
+            cprintf("%s", contexto.recordes[tela->novo_recorde - 1].nome);
         }
 
         textcolor(WHITE);
@@ -159,20 +157,17 @@ struct tela_gameover tela_gameover_desenha(struct tela_gameover tela)
 
         break;
     }
-
-    return tela;
 }
 
-static struct tela_gameover reinicia_variaveis(struct tela_gameover tela)
+static void reinicia_variaveis(struct tela_gameover *tela)
 {
-    tela.novo_recorde = 0;
-    tela.lendo_novo_recorde = 0;
+    tela->novo_recorde = 0;
+    tela->lendo_novo_recorde = 0;
 
-    tela.cursor.posicao = 0;
-    tela.cursor.mostrar = 1;
+    tela->cursor.posicao = 0;
+    tela->cursor.mostrar = 1;
 
-    tela.temporizador = clock();
-    return tela;
+    tela->temporizador = clock();
 }
 
 static void desenha_gameover(int x, int y)
