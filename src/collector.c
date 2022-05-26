@@ -4,6 +4,9 @@
 #include "collector.h"
 #include "utilitarios.h"
 
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
+
 static struct contexto contexto_alterado;
 
 static void atualiza_telas(struct collector *collector);
@@ -16,6 +19,8 @@ static void salva_recordes(struct collector *collector);
 
 static void animacao_comum(struct collector *collector);
 static void animacao_gameover(struct collector *collector);
+
+static void inicializa_audio(struct collector *collector);
 
 void collector_novo(struct collector *collector)
 {
@@ -49,6 +54,7 @@ void collector_novo(struct collector *collector)
     tela_creditos_nova(&collector->tela.creditos);
 
     carrega_recorde_salvo(collector);
+    inicializa_audio(collector);
 }
 
 void collector_rodar(struct collector *collector)
@@ -71,6 +77,9 @@ void collector_rodar(struct collector *collector)
     }
 
     salva_recordes(collector);
+
+    ma_decoder_uninit(&collector->audio.fundo);
+    ma_device_uninit(&collector->audio.dispositivo);
 }
 
 void collector_altera_contexto(struct contexto *contexto)
@@ -199,6 +208,12 @@ static void atualiza_contexto(struct collector *collector)
         memcpy(collector->contexto.cores_fundo_animacao_normal,
             contexto_alterado.cores_fundo_animacao_normal,
             sizeof(contexto_alterado.cores_fundo_animacao_normal));
+    }
+
+    if (contexto_alterado.alteracao & COLLECTOR_CONTEXTO_TOCAR_AUDIO) {
+        collector->audio.lista[contexto_alterado.numero_audio].finalizado = 0;
+        ma_data_source_seek_to_pcm_frame(
+            &collector->audio.lista[contexto_alterado.numero_audio].audio, 0);
     }
 }
 
@@ -377,5 +392,109 @@ static void animacao_gameover(struct collector *collector)
     cprintf(" ");
 
     (void) collector;
+}
+
+static ma_uint32 collector_audio_mixer(ma_decoder *audio, float *saida,
+    ma_uint64 frames)
+{
+    ma_result result;
+
+    ma_uint64 i;
+    ma_uint64 frames_lidos = 0;
+    ma_uint64 frames_para_ler = 0;
+    ma_uint64 frames_totais_lidos = 0;
+
+    float frames_em_buffer[2048];
+
+    while (frames_totais_lidos < frames) {
+        frames_para_ler = ma_countof(frames_em_buffer) / COLLECTOR_CANAIS_AUDIO;
+        if (frames_para_ler > frames - frames_totais_lidos)
+            frames_para_ler = frames - frames_totais_lidos;
+
+        result = ma_data_source_read_pcm_frames(audio, frames_em_buffer,
+            frames_para_ler, &frames_lidos);
+        if (result != MA_SUCCESS || frames_para_ler == 0
+            || frames_lidos < frames_para_ler)
+            break;
+
+        for (i = 0; i < frames_lidos * COLLECTOR_CANAIS_AUDIO; ++i)
+            saida[frames_totais_lidos * COLLECTOR_CANAIS_AUDIO + i] +=
+                frames_em_buffer[i];
+
+        frames_totais_lidos += frames_lidos;
+    }
+
+    return frames_totais_lidos;
+}
+
+static void collector_audio(ma_device *dispositivo, void *saida,
+    const void *entrada, ma_uint32 frames)
+{
+    int i;
+    struct collector_audio *audio = dispositivo->pUserData;
+
+
+    collector_audio_mixer(&audio->fundo, saida, frames);
+    for (i = 0; i < COLLECTOR_AUDIOS; ++i) {
+        if (audio->lista[i].finalizado)
+            continue;
+
+        if (collector_audio_mixer(&audio->lista[i].audio, saida, frames) < frames)
+            audio->lista[i].finalizado = 1;
+    }
+
+    ma_apply_volume_factor_pcm_frames_f32(saida, frames,
+        COLLECTOR_CANAIS_AUDIO, 0.4f);
+
+    (void) entrada;
+}
+
+static void inicializa_audio(struct collector *collector)
+{
+    int i;
+    char audios[COLLECTOR_AUDIOS][100] = {
+        "assets/efeito.mp3"
+    };
+
+    ma_result result;
+
+    ma_decoder_config config_audio =
+        ma_decoder_config_init(COLLECTOR_FORMATO_AUDIO, COLLECTOR_CANAIS_AUDIO,
+            COLLECTOR_FREQUENCIA_AUDIO);
+
+    ma_device_config config_dispositivo_audio =
+        ma_device_config_init(ma_device_type_playback);
+
+    /* Carrega a música de fundo */
+    result = ma_decoder_init_file("assets/musica.mp3", &config_audio,
+        &collector->audio.fundo);
+    if (result != MA_SUCCESS)
+        return;
+
+    ma_data_source_set_looping(&collector->audio.fundo, MA_TRUE);
+
+    /* Carrega o restante dos audios */
+    for (i = 0; i < COLLECTOR_AUDIOS; ++i) {
+        collector->audio.lista[i].finalizado = 1;
+
+        result = ma_decoder_init_file(audios[i], &config_audio,
+            &collector->audio.lista[i].audio);
+        if (result != MA_SUCCESS)
+            return;
+    }
+
+    /* Cria o dispositivo de playback de audio */
+    config_dispositivo_audio.playback.channels = COLLECTOR_CANAIS_AUDIO;
+    config_dispositivo_audio.playback.format = COLLECTOR_FORMATO_AUDIO;
+    config_dispositivo_audio.sampleRate = COLLECTOR_FREQUENCIA_AUDIO;
+    config_dispositivo_audio.dataCallback = collector_audio;
+    config_dispositivo_audio.pUserData = &collector->audio;
+
+    result = ma_device_init(NULL, &config_dispositivo_audio,
+        &collector->audio.dispositivo);
+    if (result != MA_SUCCESS)
+        return;
+
+    ma_device_start(&collector->audio.dispositivo);
 }
 
