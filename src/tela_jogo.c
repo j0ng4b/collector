@@ -61,8 +61,11 @@ void tela_jogo_atualiza(struct tela_jogo *tela)
     }
 
     if (tela->janela.pausa.visivel) {
-        if (tela->janela.pausa.redesenhar)
-            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+        if (tela->janela.pausa.redesenhar) {
+            contexto.numero_audio = 0;
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA
+                | COLLECTOR_CONTEXTO_TOCAR_AUDIO;
+        }
 
         tela->janela.estava_visivel = 1;
         switch (janela_atualiza(&tela->janela.pausa, contexto.tecla)) {

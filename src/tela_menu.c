@@ -69,9 +69,13 @@ void tela_menu_atualiza(struct tela_menu *tela)
             break;
 
         default:
-            if (tela->janela.sair.redesenhar)
-                contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
             break;
+        }
+
+        if (tela->janela.sair.redesenhar) {
+            contexto.numero_audio = 0;
+            contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA
+                | COLLECTOR_CONTEXTO_TOCAR_AUDIO;
         }
     } else if (tela->janela.informacoes.visivel) {
         if (janela_atualiza(&tela->janela.informacoes, contexto.tecla)
@@ -101,12 +105,18 @@ void tela_menu_atualiza(struct tela_menu *tela)
             break;
         }
     } else if (contexto.tecla == 'w' && tela->opcao_selecionada > 0) {
-        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
         tela->opcao_selecionada--;
+
+        contexto.numero_audio = 0;
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA
+            | COLLECTOR_CONTEXTO_TOCAR_AUDIO;
     } else if (contexto.tecla == 's'
         && tela->opcao_selecionada < TELA_MENU_NUMERO_OPCOES - 1) {
-        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
         tela->opcao_selecionada++;
+
+        contexto.numero_audio = 0;
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA
+            | COLLECTOR_CONTEXTO_TOCAR_AUDIO;
     }
 
     collector_altera_contexto(&contexto);

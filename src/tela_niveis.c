@@ -26,11 +26,17 @@ void tela_niveis_atualiza(struct tela_niveis *tela)
 
     if (contexto.tecla == 'a' && tela->nivel_selecionado > 0) {
         tela->nivel_selecionado--;
-        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+
+        contexto.numero_audio = 0;
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA
+            | COLLECTOR_CONTEXTO_TOCAR_AUDIO;
     } else if (contexto.tecla == 'd'
         && tela->nivel_selecionado < NUMERO_NIVEIS_DIFICULDADE - 1) {
         tela->nivel_selecionado++;
-        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
+
+        contexto.numero_audio = 0;
+        contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA
+            | COLLECTOR_CONTEXTO_TOCAR_AUDIO;
     } else if (contexto.tecla == 'b') {
         contexto.tela = TELA_MENU;
         contexto.alteracao = COLLECTOR_CONTEXTO_ALTERAR_TELA;
