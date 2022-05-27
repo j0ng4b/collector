@@ -26,7 +26,7 @@ void desenha_moldura(int transparente, int x, int y, int largura, int altura)
         for (moldura_x = 0; moldura_x < largura; ++moldura_x) {
             if (moldura_y == 0 || moldura_y == altura - 1) {
                 gotoxy(x + moldura_x, y + moldura_y);
-                cprintf("─");
+                printf("─");
             } else if (moldura_x == 0 || moldura_x == largura - 1) {
                 gotoxy(x + moldura_x, y + moldura_y);
                 cprintf("|");
@@ -38,16 +38,16 @@ void desenha_moldura(int transparente, int x, int y, int largura, int altura)
     }
 
     gotoxy(x, y);
-    cprintf("╭");
+    printf("╭");
 
     gotoxy(x + largura - 1, y);
-    cprintf("╮");
+    printf("╮");
 
     gotoxy(x, y + altura - 1);
-    cprintf("╰");
+    printf("╰");
 
     gotoxy(x + largura - 1, y + altura - 1);
-    cprintf("╯");
+    printf("╯");
 }
 
 void desenha_nome_jogo(int x, int y)
