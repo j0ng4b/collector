@@ -47,6 +47,7 @@ void tela_jogo_nova(struct tela_jogo *tela)
 
 void tela_jogo_atualiza(struct tela_jogo *tela)
 {
+    int i;
     struct contexto contexto = collector_contexto();
 
     if (tolower(contexto.tecla) == 'p' && !tela->janela.timer.visivel) {
@@ -93,16 +94,20 @@ void tela_jogo_atualiza(struct tela_jogo *tela)
 
         collector_altera_contexto(&contexto);
         return;
-    } else if (contexto.tecla == 'd' &&
-        tela->coletor.posicao_x + LARGURA_COLETOR <= COLUNAS) {
+    } else if (tolower(contexto.tecla)  == 'd') {
         tela->coletor.posicao_x++;
+        if( tela->coletor.posicao_x >=COLUNAS)
+            tela->coletor.posicao_x=1;
 
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
-    } else if (contexto.tecla == 'a' && tela->coletor.posicao_x > 1) {
+    } else if (tolower(contexto.tecla) == 'a' ) {
         tela->coletor.posicao_x--;
+        if( tela->coletor.posicao_x < 1)
+            tela->coletor.posicao_x=COLUNAS-1;
 
         contexto.alteracao = COLLECTOR_CONTEXTO_REDESENHAR_TELA;
     }
+
 
     if ((clock() - tela->temporizador) / (double) CLOCKS_PER_SEC >
         tela->bola.velocidade_y) {
@@ -135,14 +140,15 @@ void tela_jogo_atualiza(struct tela_jogo *tela)
     }
 
     if (tela->bola.posicao_y >= tela->coletor.posicao_y) {
-        if (tela->bola.posicao_y == tela->coletor.posicao_y
-            && tela->bola.posicao_x >= tela->coletor.posicao_x
-            && tela->bola.posicao_x < tela->coletor.posicao_x
-                + LARGURA_COLETOR) {
+        if (tela->bola.posicao_y == tela->coletor.posicao_y){
+             for (i = 0; i < LARGURA_COLETOR; ++i) {
+        if(((tela->coletor.posicao_x + i)%COLUNAS)==tela->bola.posicao_x){
             tela->bola.posicao_x = 1 + rand() % COLUNAS;
             tela->bola.posicao_y = POSICAO_INICIAL_BOLA;
 
-            tela->coletor.pontos++;
+
+            tela->coletor.pontos++;}
+             }
         } else if (tela->bola.posicao_y - 2 == tela->coletor.posicao_y) {
             contexto.pontos = tela->coletor.pontos;
             reinicia_jogo(tela);
@@ -222,7 +228,7 @@ void tela_jogo_desenha(struct tela_jogo *tela)
 
     textbackground(WHITE);
     for (i = 0; i < LARGURA_COLETOR; ++i) {
-        gotoxy(tela->coletor.posicao_x + i, tela->coletor.posicao_y);
+        gotoxy((tela->coletor.posicao_x + i)%COLUNAS, tela->coletor.posicao_y );
         cprintf(" ");
     }
 }
